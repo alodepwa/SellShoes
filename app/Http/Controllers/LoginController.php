@@ -37,10 +37,9 @@ class LoginController extends Controller
             $id = $user->id;
             $request->session()->push('user.email',$id);
             if($role==1)
-                 return redirect()->route('page.index');
+                return redirect()->route('page.index');
             if($role==2)
                 return redirect()->route('homeAdmin');
-           
         }else{
             return redirect()->route('login')->with('error','Sài tài khoản hoặc mật khẩu');
         }
@@ -77,9 +76,15 @@ class LoginController extends Controller
         $request->validate([
             'name'=>'required',
             'email'=>'required|email',
-            'password'=>'required|min:6|max:12'
+            'password'=>'required|min:6|max:12',
+            'tel'=>'required|numeric',
+            'address'=>'required',
+
         ],[
             'name.required'=>"Name không được để trống!",
+            'address.required'=>"Address không được để trống!",
+            'tel.required'=>"Tel không được để trống!",
+            'tel.numeric'=>"Tel cần nhập là số!",
             'email.required'=>"Email không được để trống!",
             'password.required'=>"Password không được để trống!",
             'email.email'=>"Cần nhập vào là email!",

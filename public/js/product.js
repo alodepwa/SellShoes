@@ -14,6 +14,7 @@ $(document).ready(function(){
 	$(document).on('click','#save',function(e){
 		e.preventDefault();
 		$('.notification').show();
+		$('.messE').html('');
 		$.ajax({
 			url: '/admin/product',
 			type: 'POST',
@@ -29,14 +30,13 @@ $(document).ready(function(){
 				'description':$('#addProduct textarea[name="description"]').val(),
 			},
 			success:function(data){
-				console.log(data);
 				if(data != undefined && data.errors !=undefined){
 					$.each(data.errors, function(key,value){
 						$('.notificationE').show();
-						$('.messE').html("");
 						$('.messE').append(value+'<br>');
 					});
 				}else{
+					$('.notificationE').hide();
 					alert(data['dataSuccess']);
 				}
 			},
@@ -82,7 +82,6 @@ $(document).ready(function(){
 		$(document).on("click",'.editPro', function(){
 			$('.notification').hide();
 			var id = $(this).attr("data-id");
-			console.log(id);
 			$.ajax({
 				url:'/admin/product/editPro/'+id,
 				type:'GET',
@@ -99,7 +98,7 @@ $(document).ready(function(){
 				}
 			});
 			$('#save_Edit_Cate').on("click", function(){
-				if(confirm('Bạn có muốn cập nhật?')){
+				$('.mess').html('');
 				$.ajax({
 					url:'/admin/product/'+id,
 					type:'PUT',
@@ -122,6 +121,7 @@ $(document).ready(function(){
 								$('.mess').append('<p>'+value+'</p>');
 							});
 						}else{
+							$('.notification').hide();
 							alert(data['message']);
 						}
 						$("#table_Cate").load(' #table_Cate');
@@ -131,7 +131,6 @@ $(document).ready(function(){
 						
 					}
 				});
-			}
 		});
 
 		$("#close_Edit").on("click", function(){

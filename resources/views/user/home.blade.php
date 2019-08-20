@@ -11,10 +11,24 @@
     width: 160px;
     height: 160px;
   }
+  #sliderRange{
+
+  }
 </style>
+
+ <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/smoothness/jquery-ui.css">
+<script src="//code.jquery.com/jquery-1.12.4.js"></script>
+<script src="//code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 @endsection
 
 @section('content')
+<?php 
+// Session()->flush();
+  // echo "<pre>";
+  // print_r (Session()->get('user'));
+  // echo "</pre>";
+
+ ?>
 <div class="bg-light py-3">
       <div class="container">
         <div class="row">
@@ -34,9 +48,10 @@
 <div class="site-section">
       <div class="container">
         <div class="row mb-5">
-          <div class="col-md-9 order-2">
+          <div class="col-md-9 order-2" >
             <div class="row mb-5" id="showProduct">
               @foreach($product as $value)
+
                 <div class="col-sm-6 col-lg-4 mb-4" data-aos="fade-up">
                   <div class="block-4 text-center border">
                     <figure class="block-4-image">
@@ -45,10 +60,25 @@
                         @break
                        @endforeach
                     </figure>
-                    <div class="block-4-text p-4">
-                      <h3><a href='{{route("showDetail",$value->id)}}'>{{$value->name}}</a></h3>
-                      <p class="text-primary font-weight-bold mt-2">{{$value->price}} vnđ</p>
-                      <a href="{{route('view',$value->id)}}" class="btn btn-info">View</a>
+                    <div class="block-4-text px-2">
+                      <h3><a href='{{route("showDetail",$value->id)}}' class="text-dark">{{$value->name}}</a></h3>
+                      @if(!$value->promotion)
+                        <p class="text-primary font-weight-bold text-left text-danger mt-2"><?php echo number_format($value->price) ?> <u>đ</u></p>
+                      @endif
+                      @if($value->promotion)
+                        <?php 
+                            $end =  $value->promotion->end;
+                            $start =  $value->promotion->start;
+                            $today = date('Y-m-d');
+                         ?>
+                         @if(strtotime($today) >= strtotime($start) && strtotime($end)>=strtotime($today))
+                          <p class="text-primary font-weight-bold text-left text-danger mt-3"><?php echo number_format($value->price-($value->price*$value->promotion->unit/100)) ?> <u>đ</u></p>
+                          <p class="text-left"><strike>đ <?php echo number_format($value->price) ?> </strike>&nbsp;&nbsp;-{{$value->promotion->unit}}%</p>
+                        @endif
+                        @if(strtotime($today)< strtotime($start)  || strtotime($end)< strtotime($today))
+                         <p class="text-primary font-weight-bold text-left text-danger mt-2"><?php echo number_format($value->price) ?> <u>đ</u></p>
+                        @endif
+                      @endif
                     </div>
                   </div>
                 </div>
@@ -75,8 +105,11 @@
             <div class="border p-4 rounded mb-4">
               <div class="mb-4">
                 <h3 class="mb-3 h6 text-uppercase text-black d-block">Filter by Price</h3>
-                <div id="slider-range" class="border-primary"></div>
-                <input type="text" name="text" id="amount" class="form-control border-0 pl-0 bg-white" disabled="" />
+                <!-- <div id="slider-range" class="border-primary"></div> -->
+               <div id="sliderRange" class="border-primary"></div>
+               <label id="amount" class="mt-2"></label>
+               <input type="hidden" name="startPrices" id="amountStart">
+               <input type="hidden" name="endPrices" id="amountEnd">
               </div>
 
               <div class="mb-4">

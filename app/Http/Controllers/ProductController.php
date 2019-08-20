@@ -190,13 +190,19 @@ class ProductController extends Controller
             'name'=>'required',
             'price'=>'required|numeric',
             'description'=>'required',
-            'quantity'=>'required|numeric'
+            'quantity'=>'required|numeric',
+            'brand_id'=>'required',
+            'size_id'=>'required',
+            'category_id'=>'required'
         ],[
             'name.required'=>'Tên sản phẩm không được để trống!',
             'quantity.required'=>'Số lượng sản phẩm không được để trống!',
             'price.numeric'=>'Giá sản phẩm cần nhập là số!',
             'price.required'=>'Giá sản phẩm không được để trống!',
-            'description.required'=>'Mô tả sản phẩm không được để trống!'
+            'description.required'=>'Mô tả sản phẩm không được để trống!',
+            'brand_id.required'=>'Brand không được để trống!',
+            'size_id.required'=>'Size sản phẩm không được để trống!',
+            'category_id.required'=>'Category sản phẩm không được để trống!',
         ]);
 
         if($validator->fails()){
@@ -252,13 +258,20 @@ class ProductController extends Controller
             'name'=>'required',
             'price'=>'required|numeric',
             'description'=>'required',
-            'quantity'=>'required|numeric'
+            'quantity'=>'required|numeric',
+            'brand_id'=>'required',
+            'size_id'=>'required',
+            'category_id'=>'required'
         ],
         [
             'name.required'=>'Tên sản phẩm không được để trống!',
+            'quantity.required'=>'Số lượng sản phẩm không được để trống!',
+            'price.numeric'=>'Giá sản phẩm cần nhập là số!',
             'price.required'=>'Giá sản phẩm không được để trống!',
-            'description.required'=>"Mô tả sản phẩm không được để trống!",
-            'quantity.required'=>'Giá sản phẩm không được để trống!'
+            'description.required'=>'Mô tả sản phẩm không được để trống!',
+            'brand_id.required'=>'Brand không được để trống!',
+            'size_id.required'=>'Size sản phẩm không được để trống!',
+            'category_id.required'=>'Category sản phẩm không được để trống!',
         ]);
 
         if($validator->fails()){
@@ -279,8 +292,6 @@ class ProductController extends Controller
             }
             return Response()->json($result);
         }
-       
-        
     }
 
     /**

@@ -13,7 +13,8 @@
     <link rel="stylesheet" href="/venderUser/css/jquery-ui.css">
     <link rel="stylesheet" href="/venderUser/css/owl.carousel.min.css">
     <link rel="stylesheet" href="/venderUser/css/owl.theme.default.min.css">
-
+  
+    <link rel="stylesheet" href="/css/user.css">
 
     <link rel="stylesheet" href="/venderUser/css/aos.css">
 
@@ -39,11 +40,24 @@
             <div class="col-6 col-md-4 order-3 order-md-3 text-right">
               <div class="site-top-icons">
                 <ul>
-                  @if(Session()->has('user'))
-                    <li><a href="{{route('logout')}}">{{Session::get('name')}} <span class="icon icon-person"></span></a></li>
+                  @if(Session()->has('user.email'))
+                  <?php 
+                    $user = \Auth::user();
+                    $name= $user->name;
+                   ?>
+                    <li id="usr">
+                      <a href="" id="user" ><span class="icon icon-person"></span>{{$name}}</a>
+                      <ul id="userChild">
+                        <li><a href="{{route('mngOrders.index')}}">Đơn Hàng</a></li>
+                        <li><a href="{{route('logout')}}">Đăng Xuất</a></li>
+                      </ul>
+                    </li>
                   @endif
-                  
-                  @if(!Session()->has('user'))
+                   @if(!Session()->has('user.email'))
+                    <li><a href="{{route('register')}}"><span class="icon icon-person">Register</span></a></li>
+                  @endif
+                 
+                  @if(!Session()->has('user.email'))
                     <li><a href="{{route('formLogin')}}"><span class="icon icon-person">Login</span></a></li>
                   @endif
                   <!-- <li><a href="#"><span class="icon icon-heart-o"></span></a></li> -->

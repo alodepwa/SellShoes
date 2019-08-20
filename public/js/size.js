@@ -28,7 +28,6 @@ $(document).ready(function(){
 						$('.messE').append(value);
 					});
 				}
-				alert(data.datasuccess);
 				if(data != undefined && data.datasuccess != undefined){
 					$.each(data['datasuccess'], function(key, value){
 						$('.notificationS').hide();

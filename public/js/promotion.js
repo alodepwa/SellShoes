@@ -13,37 +13,43 @@ $(document).ready(function(){
 	// start add promotion
 	$('#save').click(function(e){
 		e.preventDefault();
-		$('.notification').show();
-		$.ajax({
-			url:'/admin/promotion',
-			type:"POST",
-			dataType:'json',
-			data:{
-				'name':$('#addPromotion input[name="name"]').val(),
-				'code':$('#addPromotion input[name="code"]').val(),
-				'unit':$('#addPromotion input[name="unit"]').val(),
-				'end':$('#addPromotion input[name="end"]').val(),
-				'start':$('#addPromotion input[name="start"]').val(),
-				'product_id':$('#addPromotion select[name="product_id"]').val(),
-			},
-			success:function(data){
-				console.log(data);
-				if(data != undefined && data.errors != undefined){
-					$.each(data.errors,function(key,value){
-						$('.notification').show();
-						$('.mess').append(value+'<br>');
-					});
-				}else{
-					$('.notification').hide();
-					alert(data['dataSuccess']);
-					$("#table_Cate").load(' #table_Cate');
-			$("#pageAdd").load(" #pageAdd");
+		$('.mess').html('');
+		// $('.notification').show();
+		var unit = $('#addPromotion input[name="unit"]').val();
+		if(unit <=100 && unit >= 0){
+			$.ajax({
+				url:'/admin/promotion',
+				type:"POST",
+				dataType:'json',
+				data:{
+					'name':$('#addPromotion input[name="name"]').val(),
+					'unit':unit,
+					'end':$('#addPromotion input[name="end"]').val(),
+					'start':$('#addPromotion input[name="start"]').val(),
+					'product_id':$('#addPromotion select[name="product_id"]').val(),
+				},
+				success:function(data){
+					console.log(data);
+					if(data != undefined && data.errors != undefined){
+						$.each(data.errors,function(key,value){
+							$('.notification').show();
+							$('.mess').append(value+'<br>');
+						});
+					}else{
+						$('.notification').hide();
+						alert(data['dataSuccess']);
+						$("#table_Cate").load(' #table_Cate');
+				$("#pageAdd").load(" #pageAdd");
+					}
+				},
+				error:function(error){
+					$('.mess').html("ERROR!!!");
 				}
-			},
-			error:function(error){
-				$('.mess').html("ERROR!!!");
-			}
-		});
+			});
+		}else{
+			$('.notification').show();
+			$('.mess').append('Unit cần bé hơn 100');
+		}
 	});  
 	// end add
 
@@ -78,7 +84,7 @@ $(document).ready(function(){
 		};
 	});
 
-		// start update promotion
+	// start update promotion
 	$(document).on('click','.edit_Cate', function(){
 
 		var id = $(this).attr("data-id");
@@ -91,7 +97,6 @@ $(document).ready(function(){
 			data:{},
 			success:function(data){
 				$('#editPromotion input[name="name"]').val(data['name']);
-				$('#editPromotion input[name="code"]').val(data['code']);
 				$('#editPromotion input[name="unit"]').val(data['unit']);
 				$('#editPromotion input[name="start"]').val(data['start']);
 				$('#editPromotion input[name="end"]').val(data['end']);

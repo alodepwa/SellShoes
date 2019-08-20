@@ -8,7 +8,6 @@ $(document).ready(function(){
 	});
 
 	$(".createUser .notification").hide();
-	// start add users
 	$('.createUser input[type="button"]').click(function(e){
 		e.preventDefault();
 		var name = $('.createUser input[name="name"]').val();

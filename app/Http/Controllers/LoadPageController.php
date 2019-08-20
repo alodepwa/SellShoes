@@ -8,6 +8,8 @@ use App\Size;
 use App\Product;
 use App\Order;
 use Validator;
+use App\Mail\SendMail;
+use Mail;
 class LoadPageController extends Controller
 {
 
@@ -43,13 +45,27 @@ class LoadPageController extends Controller
             }
             foreach ($productID as $key => $value) {
                 $order[$value]=['quantity'=>$sl[$key],'price'=>$priceID[$key][0]['price'],'size'=>$sizeID[$key][0]['id']];
+                $productName[$key]=Product::findOrFail($value);
+               
             }
-
-            $sessionUser = Session()->get('user');
-            $email = $sessionUser['email'][0];
+            foreach ($productName as $key => $value) {
+                 $pathImage[$key]=$value->images;
+            }
+            foreach ($sizeID as $key => $value) {
+                $sizeName[$key]=Size::findOrFail($value);
+            }
             if(Order::create($data)->products()->sync($order)){
-                $result="Bạn đã đặt hàng thành công!";
-                Session()->forget('user.'.$email);
+                $sessionUser = Session()->get('user');
+                $email = $sessionUser['email'][0];
+                $mailOrder=$user->name;
+                if(Mail::to($request->email)->send(new SendMail($mailOrder,$productName,$pathImage,$sizeName,$priceID,$sl)))
+                {
+                     $result="Bạn đã đặt hàng thành công!";
+                     Session()->forget('user.'.$email);
+                }
+                else{
+                    $result="Gặp vấn đề trong việc gởi mail!";
+                }
             }
             return response()->json($result);
         }
@@ -66,7 +82,8 @@ class LoadPageController extends Controller
         $total =$request->get('total');
         $size = explode(';', $request->get('sizeAll'));
         $productID = explode(';', $request->get('productID'));
-        return view('user.checkout',compact('quantity','price','nameProduct','total','productID','size'));
+        $user = \Auth::user();
+        return view('user.checkout',compact('quantity','price','nameProduct','total','productID','size','user'));
     }
 
 
@@ -92,9 +109,7 @@ class LoadPageController extends Controller
     public function cartDetail(){
         $user = \Auth::user();
         $id = $user->id;
-
         $product = Session()->get('user');
-
         foreach ($product as $key => $value) {
             if($key == $id){
                 $productID = $value;
@@ -102,7 +117,7 @@ class LoadPageController extends Controller
         }
         if(!empty($productID)){
             foreach ($productID['cart'] as $key => $value) {
-               $allPro[]= Product::findOrFail($key);
+               $allPro[]= Product::findOrFail($value[0]);
             }
             if(empty($allPro)){
                 return view('user.cart');
@@ -123,7 +138,7 @@ class LoadPageController extends Controller
         $user = \Auth::user();
         $id = $user->id;
         $idProduct = $request->get('id');
-        $request->session()->push('user.'.$id.'.cart.'.$idProduct.'.size',$request->get('size'));
+        $request->session()->push('user.'.$id.'.cart',[$idProduct,$request->get('size')]);
         $cart =$request->session()->get('user');
         foreach ($cart as $key => $value) {
             if($key == $id){
@@ -132,7 +147,6 @@ class LoadPageController extends Controller
         }
         $count = count($result['cart']);
         return response()->json($count);
-        
     }
 
 
@@ -140,8 +154,17 @@ class LoadPageController extends Controller
     public function showPrice(Request $request){
         $data = $request->get('quantity');
         $id = $request->get('id');
-        $quantity = Product::findOrFail($id)->price;
-        $out = $quantity*$data;
+        $product = Product::findOrFail($id);
+        $end =  $product->promotion->end;
+        $start =  $product->promotion->start;
+        $today = date('Y-m-d');
+        if(strtotime($today) >= strtotime($start) && strtotime($end)>=strtotime($today)){
+            $quantity = $product->price-($product->price* $product->promotion->unit/100);
+        }
+        if(strtotime($today)< strtotime($start)  || strtotime($end)< strtotime($today)){
+            $quantity = Product::findOrFail($id)->price;
+        }
+        $out = number_format($quantity*$data);
         return response()->json($out);
     }
 
@@ -153,7 +176,6 @@ class LoadPageController extends Controller
         $data = $request->get('value');
         if(!empty($data)){
             $product = Product::where('name','like','%'.$data.'%')->orWhere('price','like','%'.$data.'%')->get();
-
         }else{
             $product =Product::paginate(12);
         }
@@ -173,17 +195,19 @@ class LoadPageController extends Controller
                         </figure>
                         <div class="block-4-text p-4">
                           <h3><a href="http://phpshoes.com/user/showDetail/'.$value->id.'" data-id="'.$value->id.'">'.$value->name.'</a></h3>
-                          <p class="text-primary font-weight-bold" data-id="'.$value->id.'">'.$value->price.' vnđ</p>
+                          <p class="text-primary font-weight-bold text-left text-danger mt-2" data-id="'.$value->id.'">'.$value->price.' vnđ</p>
+                          <p class="text-left"><strike>1000 <u>đ</u></strike> -50%</p>
                         </div>
                       </div>
                     </div>
                     
                     ';
             }
+             return response()->json($out,200);
         }else{
-            $out.='<p>Sản phẩm này không được tìm thấy!</p>';
+            $err = "không tìm thấy sản phẩm";
+             return response()->json($err,400);
         }
-        return response()->json($out);
     }
 
 
@@ -194,11 +218,16 @@ class LoadPageController extends Controller
         $out="";
         if($count>=1){
             foreach ($products as $key => $value) {
+                $end =  $value->promotion->end;
+                $start =  $value->promotion->start;
+                $today = date('Y-m-d');
                 foreach ($value->images as $key => $val) {
                    $img = $val->path;
                    break;
                 }
-               $out.='
+                if(strtotime($today) >= strtotime($start) && strtotime($end)>=strtotime($today)){
+                    $quantity = $value->price-($value->price* $value->promotion->unit/100);
+                    $out.='
                         <div class="col-sm-6 col-lg-4 mb-4" data-aos="fade-up">
                         <div class="block-4 text-center border">
                         <figure class="block-4-image" data-id="'.$value->id.'">
@@ -206,12 +235,30 @@ class LoadPageController extends Controller
                         </figure>
                         <div class="block-4-text p-4">
                           <h3><a href="http://phpshoes.com/user/showDetail/'.$value->id.'" data-id="'.$value->id.'">'.$value->name.'</a></h3>
-                          <p class="text-primary font-weight-bold" data-id="'.$value->id.'">'.$value->price.' vnđ</p>
+                          <p class="text-primary font-weight-bold text-left text-danger mt-3" data-id="'.$value->id.'">'.number_format($quantity).' vnđ</p>
+                          <p class="text-left"><strike>đ '.number_format($value->price).'</strike>&nbsp;&nbsp;-'.$value->promotion->unit.'%</p>
                         </div>
                       </div>
                     </div>
                     
                     ';
+                }
+                if(strtotime($today)< strtotime($start)  || strtotime($end)< strtotime($today)){
+                    $out.='
+                        <div class="col-sm-6 col-lg-4 mb-4" data-aos="fade-up">
+                        <div class="block-4 text-center border">
+                        <figure class="block-4-image" data-id="'.$value->id.'">
+                            <a href="http://phpshoes.com/user/showDetail/'.$value->id.'"><img src="http://phpshoes.com/upImage/'.$img.'" alt="Image placeholder" class="img-fluid"></a>
+                        </figure>
+                        <div class="block-4-text p-4">
+                          <h3><a href="http://phpshoes.com/user/showDetail/'.$value->id.'" data-id="'.$value->id.'">'.$value->name.'</a></h3>
+                          <p class="text-primary font-weight-bold text-left text-danger mt-3" data-id="'.$value->id.'">'.number_format($value->price).' vnđ</p>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    ';
+                }
             }
         }else{
             $out.='<p>Sản phẩm này không được tìm thấy!</p>';
@@ -234,20 +281,48 @@ class LoadPageController extends Controller
                      $img = $vl->path;
                      break;
                  }
-                $out.='
+
+                $end =  $product->promotion->end;
+                $start =  $product->promotion->start;
+                $today = date('Y-m-d');
+
+                if(strtotime($today) >= strtotime($start) && strtotime($end)>=strtotime($today)){
+                    $quantity = $product->price-($product->price* $product->promotion->unit/100);
+                    $out.='
                         <div class="col-sm-6 col-lg-4 mb-4" data-aos="fade-up">
                         <div class="block-4 text-center border">
                         <figure class="block-4-image" data-id="'.$product->id.'">
                             <a href="http://phpshoes.com/user/showDetail/'.$product->id.'"><img src="http://phpshoes.com/upImage/'.$img.'" alt="Image placeholder" class="img-fluid"></a>
                         </figure>
                         <div class="block-4-text p-4">
-                          <h3><a href="shop-single.html" data-id="'.$product->id.'">'.$product->name.'</a></h3>
-                          <p class="text-primary font-weight-bold" data-id="'.$product->id.'">'.$product->price.' vnđ</p>
+                          <h3><a href="http://phpshoes.com/user/showDetail/'.$product->id.'" data-id="'.$product->id.'">'.$product->name.'</a></h3>
+                          <p class="text-primary font-weight-bold text-left text-danger mt-3" data-id="'.$product->id.'">'.number_format($quantity).' vnđ</p>
+                          <p class="text-left"><strike>đ '.number_format($product->price).'</strike>&nbsp;&nbsp;-'.$product->promotion->unit.'%</p>
                         </div>
                       </div>
                     </div>
                     
                     ';
+                }
+                
+                if(strtotime($today)< strtotime($start)  || strtotime($end)< strtotime($today)){
+                    $out.='
+                        <div class="col-sm-6 col-lg-4 mb-4" data-aos="fade-up">
+                        <div class="block-4 text-center border">
+                        <figure class="block-4-image" data-id="'.$product->id.'">
+                            <a href="http://phpshoes.com/user/showDetail/'.$product->id.'"><img src="http://phpshoes.com/upImage/'.$img.'" alt="Image placeholder" class="img-fluid"></a>
+                        </figure>
+                        <div class="block-4-text p-4">
+                          <h3><a href="http://phpshoes.com/user/showDetail/'.$product->id.'" data-id="'.$product->id.'">'.$product->name.'</a></h3>
+                          <p class="text-primary font-weight-bold text-left text-danger mt-3" data-id="'.$product->id.'">'.number_format($product->price).' vnđ</p>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    ';
+                    
+                }
+
             }
         }else{
              $out.='<p>Sản phẩm này không được tìm thấy!</p>';

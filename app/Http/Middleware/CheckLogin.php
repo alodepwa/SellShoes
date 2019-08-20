@@ -14,11 +14,22 @@ class CheckLogin
      */
     public function handle($request, Closure $next)
     {
-            if(\Auth::check()){
-                return $next($request);
+            if(!$request->ajax()){
+                if(\Auth::check()){
+                    return $next($request);
+                }else{
+                    return redirect()->route('formLogin');
+                    // return response()->json('',404);/
+                }
             }else{
-                return redirect()->route('formLogin');
+                if(\Auth::check()){
+                    return $next($request);
+                }else{
+                    // return redirect()->route('formLogin');
+                    return response()->json('',404);
+                }
             }
+            
         
     }
 }

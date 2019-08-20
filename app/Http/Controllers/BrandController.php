@@ -37,10 +37,12 @@ class BrandController extends Controller
     public function store(Request $request)
     { 
         $validator = Validator::make($request->all(),[
-            'name'=>'required'
+            'name'=>'required',
+            'description'=>'required'
         ],
         [
-            'name.required'=>'Brand name not null!'
+            'name.required'=>'Brand name not null!',
+            'description.required'=>'Description not null!'
         ]);
         if($validator->fails()){
             return response()->json(['errors'=>$validator->errors()->all()]);

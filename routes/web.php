@@ -1,6 +1,9 @@
 <?php
 // admin 
 
+
+
+
 Route::group(['prefix'=>'admin','middleware'=>['checkLogin','checkAdmin','web']],function(){
 
 	Route::get('/home',function(){
@@ -54,6 +57,10 @@ Route::group(['prefix'=>'admin','middleware'=>['checkLogin','checkAdmin','web']]
 	Route::resource('orders','OrderController');
 	Route::post('order/yes','OrderController@approveOrder');
 });
+
+
+
+
 	// view login user
 	Route::get('login','LoginController@index')->name('formLogin');
 
@@ -88,9 +95,15 @@ Route::group(['prefix'=>'admin','middleware'=>['checkLogin','checkAdmin','web']]
 	Route::get('user/view/{id}','LoadPageController@view')->name('view');
 
 	// view details product need login
-	Route::get('user/showDetail/{id}','LoadPageController@showDetail')->name('showDetail')->middleware('checkLogin');
+	Route::get('user/showDetail/{id}','LoadPageController@showDetail')->name('showDetail');
 
-Route::group(['prefix'=>'user','middleware'=>['checkLogin','web']],function(){
+	//filter prices product
+	Route::post('user/filterPrice','filterPriceController@filterPrice');
+
+
+
+
+Route::group(['prefix'=>'user','middleware'=>['web','checkLogin']],function(){
 
 	// change price when change quantity at view order product
 	Route::post('showPrice','LoadPageController@showPrice');
@@ -109,4 +122,10 @@ Route::group(['prefix'=>'user','middleware'=>['checkLogin','web']],function(){
 
 	// send data from user to admin
 	Route::post('order','LoadPageController@order');
+
+	// view management order
+	Route::resource('mngOrders','ManagementOrderController');
+
+	Route::get('sendmail','ManagementOrderController@sendMail')->name('sendMail');
+
 });

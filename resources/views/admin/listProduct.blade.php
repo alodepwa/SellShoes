@@ -100,7 +100,7 @@
 
   
 <div class="modal fade" id="myModal">
-	<div class="modal-dialog" role="document">
+	<div class="modal-dialog modal-lg" role="document">
 		<div class="modal-content">
 			<div class="modal-header">
 				<div class="container">
@@ -125,40 +125,53 @@
 				<form method="post" id ="addProduct">
 					@csrf
 					<fieldset class="form-group">
-						<label for="formGroupExampleInput">Product Name<small>*</small></label>
-						<input type="text" name="name" class="form-control" id="formGroupExampleInput" placeholder="Product Name...">
+						<div class="row d-flex align-items-center">
+							<div class="col-6">
+								<label for="formGroupExampleInput">Product Name<small>*</small></label>
+								<input type="text" name="name" class="form-control" id="formGroupExampleInput" placeholder="Product Name...">
+							</div>
+							<div class="col-6">
+								<label for="formGroupExampleInput1">Status</label>
+								<input type="text" name="status" class="form-control" id="formGroupExampleInput1" placeholder="Status...">
+							</div>
+						</div>
 					</fieldset>
 					<fieldset class="form-group">
-						<label for="formGroupExampleInput1">Status</label>
-						<input type="text" name="status" class="form-control" id="formGroupExampleInput1" placeholder="Status...">
-					</fieldset>
-					<fieldset class="form-group">
-						<label for="formGroupExampleInput2">Price<small>*</small></label>
-						<input type="number" step="0.001" min="0" name="price" class="form-control" id="formGroupExampleInput2" placeholder="Price...">
-					</fieldset>
-					<fieldset class="form-group">
-						<label for="formGroupExampleInput2">Quantity<small>*</small></label>
-						<input type="number" name="quantity" min="0" class="form-control" id="formGroupExampleInput2" placeholder="Quantity...">
+						<div class="row">
+							<div class="col-sm-6">
+								<label for="formGroupExampleInput2">Price<small>*</small></label>
+								<input type="number" step="0.001" min="0" name="price" class="form-control" id="formGroupExampleInput2" placeholder="Price...">
+							</div>
+							<div class="col-sm-6">
+								<label for="formGroupExampleInput2">Quantity<small>*</small></label>
+								<input type="number" name="quantity" min="0" class="form-control" id="formGroupExampleInput2" placeholder="Quantity...">
+							</div>
+						</div>
 					</fieldset>
 					<fieldset class="form-group">
 						<label >Description<small>*</small></label>
 						<textarea name="description" id="descripton" class="form-control" placeholder="Description..."></textarea>
 					</fieldset>
 					<fieldset class="form-group">
-						<label for="formGroupExampleInput3">Category ID<small>*</small></label>
-						<select name="category_id" class="form-control"  id="formGroupExampleInput3">
-							@foreach($listCategory as $value)
-								<option value="{{$value->id}}">{{$value->name}}</option>
-							@endforeach
-						</select>
-					</fieldset>
-					<fieldset class="form-group">
-						<label for="formGroupExampleInput4">Brand ID<small>*</small></label>
-						<select name="brand_id" class="form-control"  id="formGroupExampleInput4">
-							@foreach($listBrand as $value)
-								<option value="{{$value->id}}">{{$value->name}}</option>
-							@endforeach
-						</select>
+						<div class="row">
+							<div class="col-sm-6">
+								<label for="formGroupExampleInput3">Category ID<small>*</small></label>
+								<select name="category_id" class="form-control"  id="formGroupExampleInput3">
+									@foreach($listCategory as $value)
+										<option value="{{$value->id}}">{{$value->name}}</option>
+									@endforeach
+								</select>
+							</div>
+							<div class="col-sm-6">
+								<label for="formGroupExampleInput4">Brand ID<small>*</small></label>
+								<select name="brand_id" class="form-control"  id="formGroupExampleInput4">
+									@foreach($listBrand as $value)
+										<option value="{{$value->id}}">{{$value->name}}</option>
+									@endforeach
+								</select>
+							</div>
+						</div>
+						
 					</fieldset>
 					<fieldset class="form-group">
 						<label for="formGroupExampleInput5">Size ID<small>*</small></label>
@@ -184,7 +197,7 @@
 
 <!-- modal edit categories -->
 <div class="modal fade" id="myModal2">
-	<div class="modal-dialog" role="document">
+	<div class="modal-dialog modal-lg" role="document">
 		<div class="modal-content">
 			<div class="modal-header">
 				<div class="container">
@@ -203,40 +216,52 @@
 				<form id="formEdit">
 					@csrf
 					<fieldset class="form-group">
-						<label for="formGroupExampleInput">Product Name<small>*</small></label>
-						<input type="text" name="name" class="form-control" id="formGroupExampleInput" placeholder="Product Name...">
+						<div class="row d-flex align-items-center">
+							<div class="col-6">
+								<label for="formGroupExampleInput">Product Name<small>*</small></label>
+								<input type="text" name="name" class="form-control" id="formGroupExampleInput" placeholder="Product Name...">
+							</div>
+							<div class="col-6">
+								<label for="formGroupExampleInput1">Status</label>
+								<input type="text" name="status" class="form-control" id="formGroupExampleInput1" placeholder="Status...">
+							</div>
+						</div>
 					</fieldset>
 					<fieldset class="form-group">
-						<label for="formGroupExampleInput1">Status</label>
-						<input type="text" name="status" class="form-control" id="formGroupExampleInput1" placeholder="Status...">
-					</fieldset>
-					<fieldset class="form-group">
-						<label for="formGroupExampleInput2">Price<small>*</small></label>
-						<input type="number" step="0.001" min="0" name="price" class="form-control" id="formGroupExampleInput2" placeholder="Price...">
-					</fieldset>
-					<fieldset class="form-group">
-						<label for="formGroupExampleInput2">Quantity<small>*</small></label>
-						<input type="number" name="quantity" min="0" class="form-control" id="formGroupExampleInput2" placeholder="Quantity...">
+						<div class="row">
+							<div class="col-sm-6">
+								<label for="formGroupExampleInput2">Price<small>*</small></label>
+								<input type="number" step="0.001" min="0" name="price" class="form-control" id="formGroupExampleInput2" placeholder="Price...">
+							</div>
+							<div class="col-sm-6">
+								<label for="formGroupExampleInput2">Quantity<small>*</small></label>
+								<input type="number" name="quantity" min="0" class="form-control" id="formGroupExampleInput2" placeholder="Quantity...">
+							</div>
+						</div>
 					</fieldset>
 					<fieldset class="form-group">
 						<label >Description<small>*</small></label>
 						<textarea name="description" id="descripton" class="form-control" placeholder="Description..."></textarea>
 					</fieldset>
 					<fieldset class="form-group">
-						<label for="formGroupExampleInput3">Category ID<small>*</small></label>
-						<select name="category_id" class="form-control"  id="formGroupExampleInput3">
-							@foreach($listCategory as $value)
-								<option value="{{$value->id}}">{{$value->name}}</option>
-							@endforeach
-						</select>
-					</fieldset>
-					<fieldset class="form-group">
-						<label for="formGroupExampleInput4">Brand ID<small>*</small></label>
-						<select name="brand_id" class="form-control"  id="formGroupExampleInput4">
-							@foreach($listBrand as $value)
-								<option value="{{$value->id}}">{{$value->name}}</option>
-							@endforeach
-						</select>
+						<div class="row">
+							<div class="col-sm-6">
+								<label for="formGroupExampleInput3">Category ID<small>*</small></label>
+								<select name="category_id" class="form-control"  id="formGroupExampleInput3">
+									@foreach($listCategory as $value)
+										<option value="{{$value->id}}">{{$value->name}}</option>
+									@endforeach
+								</select>
+							</div>
+							<div class="col-sm-6">
+								<label for="formGroupExampleInput4">Brand ID<small>*</small></label>
+								<select name="brand_id" class="form-control"  id="formGroupExampleInput4">
+									@foreach($listBrand as $value)
+										<option value="{{$value->id}}">{{$value->name}}</option>
+									@endforeach
+								</select>
+							</div>
+						</div>
 					</fieldset>
 					<fieldset class="form-group">
 						<label for="formGroupExampleInput5">Size ID<small>*</small></label>

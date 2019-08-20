@@ -80,7 +80,6 @@
 					<div class="row">
 						<div class="container "><h4 class="modal-title">Create Brand</h4></div>
 					</div>
-						
 						<div class="row notificationE">
 							<div class="container-fluid">
 								<div class="alert alert-danger mess"></div>

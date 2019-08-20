@@ -12,6 +12,7 @@ $(document).ready(function(){
 
 	// start add brands
 	$('#save').click(function(e){
+		$('.mess').html('');
 		e.preventDefault();
 		console.log('alo');
 		$('.notification').show();
@@ -27,10 +28,11 @@ $(document).ready(function(){
 				if(data !=undefined && data.errors !=undefined){
 					$.each(data.errors,function(key,value){
 						$('.notification').show();
-						$('.mess').append(value);
+						$('.mess').append(value+'</br>');
 					});
 				}
 				else{
+					$('.notification').hide();
 					alert(data['success']);
 				}
 				$("#brandCreate").load(' #brandCreate');

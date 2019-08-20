@@ -52,24 +52,24 @@ class PromotionController extends Controller
     {
         $validator = Validator::make($request->all(),[
             'name'=>'required',
-            'code'=>'required',
             'unit'=>'required',
             'start'=>'required',
             'end'=>'required',
             'product_id'=>'required'
         ],[
             'name.required'=>'Promotion name not null!',
-            'code.required'=>'Code not null!',
             'unit.required'=>'Unit not null!',
+            'unit.max'=>'Unit less 100!',
             'start.required'=>'Start day not null!',
             'end.required'=>'End day not null!',
             'product_id.required'=>'Product_id not null!',
         ]);
         if($validator->fails()){
             return response()->json(['errors'=>$validator->errors()->all()]);
-        }else{
+        }
+        else{
             $data = $request->all();
-            $productId = Promotion::Where('product_id','=',$request->get('product_id'))->where('name','=',$request->get('name'))->first();
+            $productId = Promotion::Where('product_id','=',$request->get('product_id'))->first();
             if(!empty($productId)){
                 $result = ['dataSuccess'=>'Product ID Already Exists!'];
             }else{

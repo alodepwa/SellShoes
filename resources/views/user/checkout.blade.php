@@ -23,7 +23,7 @@
     <div class="site-section">
       <div class="container">
         <div class="row">
-          <div class="col-md-6 mb-5 mb-md-0">
+          <!-- <div class="col-md-6 mb-5 mb-md-0">
             <h2 class="h3 mb-3 text-black">Billing Details</h2>
             <div class="p-3 p-lg-5 border">
               <div class="alert alert-danger err"></div>
@@ -70,7 +70,103 @@
               </div>
 
             </div>
+          </div> -->
+
+          <div class="col-md-6 mb-5 mb-md-0">
+            <h2 class="h3 mb-3 text-black">Billing Details</h2>
+            <div class="p-3 p-lg-5 border">
+              <div class="alert alert-danger err"></div>
+              <div class="form-group">
+                <label for="c_country" class="text-black">Country <span class="text-danger">*</span></label>
+                <select id="city" class="form-control">
+                  <option value="1">Select a City</option>    
+                  <option value="2">Đà Nẵng</option>    
+                  <option value="3">Hồ Chí Minh</option>    
+                  <option value="4">Hà Nội</option>    
+                  <option value="5">Nha Trang</option>    
+                  <option value="6">Tam Kỳ</option>    
+                  <option value="7">Hội An</option>    
+                </select>
+              </div>
+              <div class="form-group row">
+                <div class="col-md-12">
+                  @if($errors->any())
+                    @foreach($errors->all() as $err)
+                    <li>$err</li>
+                    @endforeach
+                  @endif
+                  <label for="c_fname" class="text-black">Name <span class="text-danger">*</span></label>
+                  <input type="text" class="form-control" value="{{$user->name}}" id="c_fname" name="name">
+                </div>
+              </div>
+              <div class="form-group row">
+                <div class="col-md-12">
+                  <label for="c_address" class="text-black">Address <span class="text-danger">*</span></label>
+                  <input type="text" class="form-control" value="{{$user->address}}" id="c_address" name="address" >
+                </div>
+              </div>
+              <div class="form-group row mb-5">
+                <div class="col-md-6">
+                  <label for="c_email_address" class="text-black">Email Address <span class="text-danger">*</span></label>
+                  <input type="text" class="form-control" value="{{$user->email}}" name="email">
+                </div>
+                <div class="col-md-6">
+                  <label for="c_phone" class="text-black">Phone <span class="text-danger">*</span></label>
+                  <input type="text" class="form-control" name="tel" value="{{$user->tel}}">
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="c_ship_different_address" class="text-black" data-toggle="collapse" href="#ship_different_address" role="button" aria-expanded="false" aria-controls="ship_different_address"><input type="checkbox" value="1" id="c_ship_different_address"> Ship To A Different ?</label>
+                <div class="collapse" id="ship_different_address">
+                  <div class="py-2">
+
+                    <div class="form-group">
+                      <label for="c_diff_country" class="text-black">Country <span class="text-danger">*</span></label>
+                      <select id="city_diff" class="form-control">
+                        <option value="1">Select a City</option>    
+                        <option value="2">Đà Nẵng</option>    
+                        <option value="3">Hồ Chí Minh</option>    
+                        <option value="4">Hà Nội</option>    
+                        <option value="5">Nha Trang</option>    
+                        <option value="6">Tam Kỳ</option>    
+                        <option value="7">Hội An</option>    
+                      </select>
+                    </div>
+                    <div class="form-group row">
+                      <div class="col-md-12">
+                        @if($errors->any())
+                          @foreach($errors->all() as $err)
+                          <li>$err</li>
+                          @endforeach
+                        @endif
+                        <label  class="text-black">Name <span class="text-danger">*</span></label> 
+                        <input type="text" class="form-control" placeholder="Name" name="dname">
+                      </div>
+                    </div>
+                    
+                   <div class="form-group row">
+                      <div class="col-md-12">
+                        <label  class="text-black">Address <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" value=""  name="daddress" placeholder="Street address">
+                      </div>
+                    </div>
+                    <div class="form-group row mb-5">
+                      <div class="col-md-6">
+                        <label for="c_email_address" class="text-black">Email Address <span class="text-danger">*</span></label>
+                        <input type="email" placeholder="Email" class="form-control" name="demail">
+                      </div>
+                      <div class="col-md-6">
+                        <label for="c_phone" class="text-black">Phone <span class="text-danger">*</span></label>
+                        <input type="number" class="form-control" name="dtel" placeholder="Phone Number">
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
+
           <div class="col-md-6">
             
             <div class="row mb-5">
@@ -119,4 +215,12 @@
 
     
   </div>
+
+
+
+
+
+
+
+
 @endsection

@@ -8,17 +8,18 @@ $(document).ready(function(){
 	// load giá thay đổi theo sl
 	$(document).on('click','button[type="button"]',function(){
 		var value = $(this).attr('data-click');
-		var value2 = $('.'+value+'').val();
+		var size = $(this).attr('data-size');
+		var value2 = $('.'+value+'and'+size).val();
 		$.ajax({
 			url:'/user/showPrice',
 			type:'post',
 			dataType:'json',
 			data:{
 				'id':value,
-				'quantity': value2
+				'quantity':value2
 			},
 			success:function(data){
-				$('.'+value+'money').html(data);
+				$('.'+value+'and'+size+'money').html(data);
 				var total=0;
 				$('#tableCart tr').each(function(){
 					$(this).find('.total').each(function(){
@@ -83,7 +84,6 @@ $(document).ready(function(){
 	});
 
 
-
 	//tính tổng total
 		var total=0;
 		$('#tableCart tr').each(function(){
@@ -94,7 +94,7 @@ $(document).ready(function(){
 				}
 			});
 		});
-		 $('#total').html(total+' VNĐ');
+		$('#total').html(total+' VNĐ');
 
 	//checkout
 	$('#checkout').on('click',function(){
@@ -147,13 +147,22 @@ $(document).ready(function(){
 		$('form input[name="sizeAll"]').val(size);
 		$('form input[name="productID"]').val(productID);
 
+		
 	// user order
 	$('.err').hide();
 	$(document).on('click','#order',function(){
-		var name = $('input[name="name"]').val();
-		var tel = $('input[name="tel"]').val();
-		var email = $('input[name="email"]').val();
-		var address = $('input[name="address"]').val();
+		var check = $('input[type="checkbox"]:checked').val();
+		if(check==1){
+			var name = $('input[name="dname"]').val();
+			var tel = $('input[name="dtel"]').val();
+			var email = $('input[name="demail"]').val();
+			var address = $('input[name="daddress"]').val();
+		}else{
+			var name = $('input[name="name"]').val();
+			var tel = $('input[name="tel"]').val();
+			var email = $('input[name="email"]').val();
+			var address = $('input[name="address"]').val();
+		}
 		var size=[];
 		var productID=[];
 		var quantity=[];

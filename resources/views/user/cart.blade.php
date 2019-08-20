@@ -10,9 +10,6 @@
 
 @section('content')
 <?php 
-// echo "<pre>";
-// print_r (Session::all());
-// echo "</pre>";
   $size = Session::get('user');
   $email = $size['email'][0];
   foreach ($size as $key => $value) {
@@ -50,41 +47,53 @@
           				@if(!empty($allPro))
           				@foreach($allPro as $key => $value)
                    <?php 
-                           $sizeCheck= $size[$email]['cart'][$value->id]['size'][0];
+                           $sizeCheck= $size[$email]['cart'][$key][1];
                             foreach ($sizeAll as $key => $vl) {
                                if($sizeCheck==$vl->id)
                                  $nameSize= $vl->name;
                             }
                           ?>
-          					<tr>
-	                    <td class="product-thumbnail">
-	                    	@foreach($value->images as $vl)
-	                    	 	<img src='{{asset("upImage/$vl->path")}}' alt="Image" class="img-fluid">
-	                    	 	@break
-							          @endforeach
-	                    </td>
-	                    <td class="product-name">
-	                      <h2 class="h5 text-black nameProduct" data-id="{{$value->id}}">{{$value->name}}</h2>
-	                    </td>
+                    <tr>
+                      <td class="product-thumbnail">
+                        @foreach($value->images as $vl)
+                          <img src='{{asset("upImage/$vl->path")}}' alt="Image" class="img-fluid">
+                          @break
+                        @endforeach
+                      </td>
+                      <td class="product-name">
+                        <h2 class="h5 text-black nameProduct" data-id="{{$value->id}}">{{$value->name}}</h2>
+                      </td>
                       <td class="product-name">
                         <p class="size" data-name={{$nameSize}}>{{$nameSize}}</p>
                       </td>
-	                    <td  class="{{$value->id}}price price">{{$value->price}}</td>
-	                    <td width="13%">
-	                      <div class="input-group mb-3" style="max-width: 120px;">
-	                        <div class="input-group-prepend">
-	                          <button class="btn btn-outline-primary js-btn-minus " data-click="{{$value->id}}" type="button">&minus;</button>
-	                        </div>
-	                        <input type="text" class="form-control text-center quantity {{$value->id}}" data-id="{{$value->id}}" disabled value="1" placeholder="" aria-label="Example text with button addon" aria-describedby="button-addon1">
-	                        <div class="input-group-append">
-	                          <button class="btn btn-outline-primary js-btn-plus" data-click="{{$value->id}}" type="button">&plus;</button>
-	                        </div>
-	                      </div>
+                      <td  class="{{$value->id}}price price">
+                        <?php 
+                            $end =  $value->promotion->end;
+                            $start =  $value->promotion->start;
+                            $today = date('Y-m-d');
+                            if(strtotime($today) >= strtotime($start) && strtotime($end)>=strtotime($today)){
+                               echo $price= number_format($value->price-($value->price* $value->promotion->unit/100));
+                            }
+                            if(strtotime($today)< strtotime($start)  || strtotime($end)< strtotime($today)){
+                                echo $price = number_format($value->price);
+                            }
+                         ?>
+                      </td>
 
-	                    </td>
-	                    <td class="{{$value->id}}money total">{{$value->price}}</td>
-	                    <td><a href="#" class="btn btn-primary btn-sm delete"data-id="{{$value->id}}">X</a></td>
-	                  </tr>
+                      <td width="13%">
+                        <div class="input-group mb-3" style="max-width: 120px;">
+                          <div class="input-group-prepend">
+                            <button class="btn btn-outline-primary js-btn-minus " data-click="{{$value->id}}" data-size="{{$sizeCheck}}" type="button">&minus;</button>
+                          </div>
+                          <input type="text" class="form-control text-center quantity {{$value->id}}and{{$sizeCheck}}" data-id="{{$value->id}}" disabled value="1" placeholder="" aria-label="Example text with button addon" aria-describedby="button-addon1">
+                          <div class="input-group-append">
+                            <button class="btn btn-outline-primary js-btn-plus" data-size="{{$sizeCheck}}" data-click="{{$value->id}}" type="button">&plus;</button>
+                          </div>
+                        </div>
+                      </td>
+                      <td class="{{$value->id}}and{{$sizeCheck}}money total">{{$price}}</td>
+                      <td><a href="#" class="btn btn-primary btn-sm delete"data-id="{{$value->id}}">X</a></td>
+                    </tr>
           				@endforeach
           				@endif
                 </tbody>
@@ -95,19 +104,6 @@
 
         <div class="row">
           <div class="col-md-6">
-            
-            <div class="row">
-              <div class="col-md-12">
-                <label class="text-black h4" for="coupon">Coupon</label>
-                <p>Enter your coupon code if you have one.</p>
-              </div>
-              <div class="col-md-8 mb-3 mb-md-0">
-                <input type="text" class="form-control py-3" id="coupon" placeholder="Coupon Code">
-              </div>
-              <div class="col-md-4">
-                <button class="btn btn-primary btn-sm">Apply Coupon</button>
-              </div>
-            </div>
           </div>
           <div class="col-md-6 pl-5">
             <div class="row justify-content-end">
@@ -157,4 +153,5 @@
       </div>
     </div>
   </div>
+
 @endsection
