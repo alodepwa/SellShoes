@@ -37,6 +37,7 @@ $(document).ready(function(){
 				'product':product,
 				'quantity':quantity
 			},success:function(data){
+				console.log(data);
 				alert(data);
 				$('#table_Cate').load(' #table_Cate');
 			}
@@ -63,5 +64,22 @@ $(document).ready(function(){
 		}
 		
 	});
+
+	$(document).on('change','#listOrder',function(){
+		var value = $('#listOrder option:selected').val();
+		$.ajax({
+			url:'/admin/orders/list',
+			type:'POST',
+			dataType:'json',
+			data:{
+				'value':value
+			},
+			success:function(data){
+				$('#table_Cate tbody').html(data['out']);
+				$('#pageAdd').html(data['paginate']);
+			}
+		});
+	});	
+
 
 });

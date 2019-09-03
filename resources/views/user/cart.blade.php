@@ -45,14 +45,17 @@
                 </thead>
                 <tbody >
           				@if(!empty($allPro))
+                  <?php $dem=0; ?>
           				@foreach($allPro as $key => $value)
-                   <?php 
-                           $sizeCheck= $size[$email]['cart'][$key][1];
-                            foreach ($sizeAll as $key => $vl) {
-                               if($sizeCheck==$vl->id)
-                                 $nameSize= $vl->name;
-                            }
-                          ?>
+                    
+                   <?php
+                   $dem=$key;
+                     $sizeCheck= $size[$email]['cart'][$key][1];
+                      foreach ($sizeAll as $key => $vl) {
+                         if($sizeCheck==$vl->id)
+                           $nameSize= $vl->name;
+                      }
+                    ?>
                     <tr>
                       <td class="product-thumbnail">
                         @foreach($value->images as $vl)
@@ -92,7 +95,7 @@
                         </div>
                       </td>
                       <td class="{{$value->id}}and{{$sizeCheck}}money total">{{$price}}</td>
-                      <td><a href="#" class="btn btn-primary btn-sm delete"data-id="{{$value->id}}">X</a></td>
+                      <td><a href="#" class="btn btn-primary btn-sm delete"data-id="{{$dem}}">X</a></td>
                     </tr>
           				@endforeach
           				@endif
@@ -121,15 +124,11 @@
                     <strong class="text-black" id="total"></strong>
                   </div>
                 </div>
-                <div class="row mb-5">
-                  <div class="col-md-6">
-                    <span class="text-black">Total</span>
-                  </div>
-                  <div class="col-md-6 text-right">
-                    <strong class="text-black" ></strong>
-                  </div>
-                </div>
+              <?php 
 
+              
+
+               ?>
                 <div class="row">
                   <div class="col-md-12">
                     <form action="{{route('checkout')}}" method="post">

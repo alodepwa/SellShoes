@@ -115,14 +115,12 @@ class PromotionController extends Controller
     {
          $validator = Validator::make($request->all(),[
             'name'=>'required',
-            'code'=>'required',
             'unit'=>'required',
             'start'=>'required',
             'end'=>'required',
             'product_id'=>'required'
         ],[
             'name.required'=>'Promotion name not null!',
-            'code.required'=>'Code not null!',
             'unit.required'=>'Unit not null!',
             'start.required'=>'Start day not null!',
             'end.required'=>'End day not null!',

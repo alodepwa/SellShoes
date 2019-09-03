@@ -10,6 +10,7 @@ $(document).ready(function(){
 		var value = $(this).attr('data-click');
 		var size = $(this).attr('data-size');
 		var value2 = $('.'+value+'and'+size).val();
+		console.log(value+'_'+value2);
 		$.ajax({
 			url:'/user/showPrice',
 			type:'post',
@@ -54,6 +55,7 @@ $(document).ready(function(){
 	//xóa sản phẩm khỏi giỏ hàng
 	$(document).on('click','.delete',function(){
 		var value = $(this).attr('data-id');
+		console.log(value);
 		if(confirm('Bạn có muốn xóa?')){
 			$.ajax({
 				url:'/user/cartDetail',
@@ -177,6 +179,7 @@ $(document).ready(function(){
 				quantity+=$(this).attr('data-number')+';';
 			});
 		});
+		
 		$.ajax({
 			url:'/user/order',
 			dataType:'json',
@@ -190,7 +193,6 @@ $(document).ready(function(){
 				'productID':productID,
 				'quantity':quantity
 			},success:function(data){
-				console.log(data);
 				if(data != undefined && data.errors != undefined){
 					$.each(data.errors, function(key,value){
 						$('.err').show();
@@ -203,6 +205,23 @@ $(document).ready(function(){
 				}
 			}
 		});
+	});
+
+
+	// cancle order user
+	$(document).on('click','.cancleOrder',function(){
+		if(confirm('Bạn có muốn hủy đơn hàng này')){
+			var id = $(this).attr('data-id');
+			$.ajax({
+				url:'/user/cancelOrder/'+id,
+				dataType:'json',
+				method:'GET',
+				success:function(data){
+					alert(data['success']);
+					$('#autoload').load(' #autoload');
+				}
+			});
+		}
 	});
 
 });

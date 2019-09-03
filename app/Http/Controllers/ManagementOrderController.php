@@ -6,21 +6,34 @@ use Illuminate\Http\Request;
 use App\Order;
 use App\Size;
 use App\Product;
-use App\Mail\SendMail;
+use App\Mail\SendMailOrder;
 use Mail;
 
 class ManagementOrderController extends Controller
 {
-    // public function sendMail(){
-    //     $user = 'hello trung ';
-    //     Mail::to('levantrung98.qn@gmail.com')->send(new SendMail($user));
-    //     return 'send mail thành công';
-    // }
+    
     /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
+    public function cancelOrder($id){
+        $order = Order::findOrFail($id);
+        $emailOrder = $order->email;
+        $detailOrder = $order->products;
+        foreach ($detailOrder as $key => $value) {
+            $productID = $value->id;
+        }
+        $product = Product::findOrFail($productID);
+        foreach ($product->images as $key => $value) {
+            $path = $value->path;
+        }
+        $check = Mail::to($emailOrder)->send(new SendMailOrder($order,$path));
+        $order->status=3;
+        $order->save();
+        return Response()->json(['success'=>'Đơn hàng được hủy thành công'],200);
+    }
+
     public function index()
     {
         $user = \Auth::user();

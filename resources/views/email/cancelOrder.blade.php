@@ -32,33 +32,30 @@
 </head>
 <body>
 	<div>
-		{{$user}} thân mến!
+		{{$order->name}} thân mến!
 	</div>
 	<div>
-		Đơn hàng của bạn đã được đặt theo yêu cầu của bạn.
+		Đơn hàng của bạn đã hủy.
 	</div>
 	<div class="chitiet">
 		Chi tiết sản phẩm được liệt kê bên dưới.
 	</div>
 	<div>
 		<?php 
-			$count = count($product);
-
-		 ?>
-		@for($i=0;$i<$count;$i++)
-		<?php 
-			$pathImg= $path[$i][0]->path
+			$product = $order->products;
+			$pivot = $product[0]->pivot;
+			$nameProduct = $product[0]->name;
+			$price = $pivot->price;
+			$quantity = $pivot->quantity;
 		 ?>
 		<div class="anh">
-			<img src='{{$message->embed("upImage/$pathImg")}}' alt="">
+			<img src='{{$message->embed("upImage/$path")}}' alt="">
 			<div class="chu">
-				<div class="chunho">Tên SP: {{$product[$i]->name}}</div>
-				<div class="chunho">Size: {{$size[$i][0]->name}}</div>
-				<div class="chunho">Giá tiền: {{$price[$i]*$soluong[$i]}} đ</div>
-				<div class="chunho">Số lượng: {{$soluong[$i]}}</div>
+				<div class="chunho">Tên SP: {{$nameProduct}}</div>
+				<div class="chunho">Giá tiền:{{$price*$quantity}} đ</div>
+				<div class="chunho">Số lượng: {{$quantity}}</div>
 			</div>
 		</div>
-		@endfor
 	</div>
 	
 </body>

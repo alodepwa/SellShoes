@@ -3,10 +3,26 @@
 namespace App\Http\Controllers;
 
 use App\Comment;
+use App\Product;
+use App\Size;
 use Illuminate\Http\Request;
 
 class CommentController extends Controller
 {
+    //commentPosst
+    public function commentPost(Request $request){
+        $user = \Auth::user();
+        $data=['rate'=>$request->get('rating'),'content'=>$request->get('description'),'status'=>1,'user_id'=>$user->id,'product_id'=>$request->get('productID')];
+        if(Comment::create($data)){
+            return redirect()->route('mngOrders.index')->with('success','Đánh giá thành công!');
+        }
+    }
+    // comment
+    public function comment($id,$id1){
+        $product = Product::findOrFail($id);
+        $size = Size::where('id','=',$id1)->get('name');
+        return view('user.comment',compact('product','size'));
+    }
 
     public function read(){
         $comment =Comment::where('status','=',2)->get();

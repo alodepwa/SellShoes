@@ -7,6 +7,7 @@ use App\Category;
 use App\Size;
 use App\Product;
 use App\Order;
+use App\Comment;
 use Validator;
 use App\Mail\SendMail;
 use Mail;
@@ -40,39 +41,52 @@ class LoadPageController extends Controller
             for ($i=0; $i <count($size)-1 ; $i++) { 
                 $sizeID[$i]= Size::select('id')->where('name','=',str_replace(array('{','}'), array('',''), $size[$i]))->get();
                 $sl[$i]=str_replace(array('{','}'), array('',''),$quantity[$i]);
-                $priceID[$i]=Product::select('price')->where('id','=',str_replace(array('{','}'), array('',''),$product[$i]))->get();
+                $ProID[$i]=str_replace(array('{','}'), array('',''),$product[$i]);
+                $priceID[$i]=$this->promotionDetail($ProID[$i]);
                 $productID[$i]=str_replace(array('{','}'), array('',''),$product[$i]);
+                $fill = $this->filterQuantity($productID[$i],$sizeID[0][$i],$sl[$i]);
             }
-            foreach ($productID as $key => $value) {
-                $order[$value]=['quantity'=>$sl[$key],'price'=>$priceID[$key][0]['price'],'size'=>$sizeID[$key][0]['id']];
-                $productName[$key]=Product::findOrFail($value);
-               
-            }
-            foreach ($productName as $key => $value) {
-                 $pathImage[$key]=$value->images;
-            }
-            foreach ($sizeID as $key => $value) {
-                $sizeName[$key]=Size::findOrFail($value);
-            }
-            if(Order::create($data)->products()->sync($order)){
-                $sessionUser = Session()->get('user');
-                $email = $sessionUser['email'][0];
-                $mailOrder=$user->name;
-                if(Mail::to($request->email)->send(new SendMail($mailOrder,$productName,$pathImage,$sizeName,$priceID,$sl)))
-                {
-                     $result="Bạn đã đặt hàng thành công!";
-                     Session()->forget('user.'.$email);
-                }
-                else{
-                    $result="Gặp vấn đề trong việc gởi mail!";
-                }
+            if($fill){
+              foreach ($productID as $key => $value) {
+                  $order[$value]=['quantity'=>$sl[$key],'price'=>$priceID[$key],'size'=>$sizeID[$key][0]['id']];
+                  $productName[$key]=Product::findOrFail($value);
+              }
+              foreach ($productName as $key => $value) {
+                   $pathImage[$key]=$value->images;
+              }
+              foreach ($sizeID as $key => $value) {
+                  $sizeName[$key]=Size::findOrFail($value);
+              }
+              if(Order::create($data)->products()->sync($order)){
+                  $sessionUser = Session()->get('user');
+                  $email = $sessionUser['email'][0];
+                  $mailOrder=$user->name;
+                  Mail::to($request->email)->send(new SendMail($mailOrder,$productName,$pathImage,$sizeName,$priceID,$sl));
+                 $result="Bạn đã đặt hàng thành công!";
+                 Session()->forget('user.'.$email);
+              }
+            }else{
+              $result="Số lượng đặt hàng vượt quá số lượng trong kho!";
             }
             return response()->json($result);
-        }
-
-        
+        }        
     }
 
+    // filter quantity
+    public function filterQuantity($id,$size,$quantity){
+      $product = Product::findOrFail($id);
+      foreach ($product->sizes as $key => $value){
+        if($value->pivot->size_id == $size->id){
+          $allQuantity = $value->pivot->quantity;
+        }
+      }
+      if($allQuantity-$quantity>=0){
+        return true;
+      }else{
+        return false;
+      }
+
+    }
 
     //view checkout
     public function checkout(Request $request){
@@ -117,7 +131,7 @@ class LoadPageController extends Controller
         }
         if(!empty($productID)){
             foreach ($productID['cart'] as $key => $value) {
-               $allPro[]= Product::findOrFail($value[0]);
+               $allPro[$key]= Product::findOrFail($value[0]);
             }
             if(empty($allPro)){
                 return view('user.cart');
@@ -149,6 +163,19 @@ class LoadPageController extends Controller
         return response()->json($count);
     }
 
+    public function promotionDetail($id){
+        $product = Product::findOrFail($id);
+        $end =  $product->promotion->end;
+        $start =  $product->promotion->start;
+        $today = date('Y-m-d');
+        if(strtotime($today) >= strtotime($start) && strtotime($end)>=strtotime($today)){
+            $quantity = $product->price-($product->price* $product->promotion->unit/100);
+        }
+        if(strtotime($today)< strtotime($start)  || strtotime($end)< strtotime($today)){
+            $quantity = Product::findOrFail($id)->price;
+        }
+        return $quantity;
+    }
 
     // change price when change quantity at view order product
     public function showPrice(Request $request){
@@ -183,11 +210,22 @@ class LoadPageController extends Controller
         $out="";
         if($count>=1){
             foreach ($product as $key => $value) {
+                $end =  $value->promotion->end;
+                $start =  $value->promotion->start;
+                $today = date('Y-m-d');
                 foreach ($value->images as $key => $val) {
                    $img = $val->path;
                    break;
                 }
-               $out.='
+                $total=0;
+                foreach ($value->orders as $key => $val) {
+                  if($value->id == $val->pivot->product_id){
+                    $total+=$val->pivot->quantity;
+                  }
+                }
+                if(strtotime($today) >= strtotime($start) && strtotime($end)>=strtotime($today)){
+                    $quantity = $value->price-($value->price* $value->promotion->unit/100);
+                    $out.='
                         <div class="col-sm-6 col-lg-4 mb-4" data-aos="fade-up">
                         <div class="block-4 text-center border">
                         <figure class="block-4-image" data-id="'.$value->id.'">
@@ -195,19 +233,202 @@ class LoadPageController extends Controller
                         </figure>
                         <div class="block-4-text p-4">
                           <h3><a href="http://phpshoes.com/user/showDetail/'.$value->id.'" data-id="'.$value->id.'">'.$value->name.'</a></h3>
-                          <p class="text-primary font-weight-bold text-left text-danger mt-2" data-id="'.$value->id.'">'.$value->price.' vnđ</p>
-                          <p class="text-left"><strike>1000 <u>đ</u></strike> -50%</p>
-                        </div>
-                      </div>
-                    </div>
+                          <p class="text-primary font-weight-bold text-left text-danger mt-3" data-id="'.$value->id.'">'.number_format($quantity).' vnđ</p>
+                          <p class="text-left"><strike>đ '.number_format($value->price).'</strike>&nbsp;&nbsp;-'.$value->promotion->unit.'%</p>
+                        
+                    ';
+                    if($value->comments->avg('rate')>=1 && $value->comments->avg('rate')<2 ){
+                        $out.='<div class="container">
+                                  <div class="row">
+                                  <div class="rating">
+                                      <input type="radio" id="star5" name="rating" value="5" /><label for="star5">5 stars</label>
+                                      <input type="radio" id="star4" name="rating" value="4" /><label for="star4">4 stars</label>
+                                      <input type="radio" id="star3" name="rating" value="3" /><label for="star3">3 stars</label>
+                                      <input type="radio" id="star2" name="rating" value="2" /><label for="star2">2 stars</label>
+                                      <input type="radio" id="star1" name="rating" value="1" /><label for="star1" class="text-warning">1 star</label>
+                                    </div>
+                                    <small style="padding-top: 08px;">('.$total.' đã bán)</small>
+                                  </div>
+                                </div>';
+                    }
+                    else if($value->comments->avg('rate')>=2 && $value->comments->avg('rate')<3 ){
+                          $out.= '<div class="container">
+                                  <div class="row">
+                                  <div class="rating">
+                                      <input type="radio" id="star5" name="rating" value="5" /><label for="star5">5 stars</label>
+                                      <input type="radio" id="star4" name="rating" value="4" /><label for="star4">4 stars</label>
+                                      <input type="radio" id="star3" name="rating" value="3" /><label for="star3">3 stars</label>
+                                      <input type="radio" id="star2" name="rating" value="2" /><label for="star2" class="text-warning">2 stars</label>
+                                      <input type="radio" id="star1" name="rating" value="1" /><label for="star1" class="text-warning">1 star</label>
+                                    </div>
+                                    <small style="padding-top: 08px;">('.$total.' đã bán)</small>
+                                  </div>
+                                </div>';
+                        }
+                        else if($value->comments->avg('rate')>=3 && $value->comments->avg('rate')<4 ){
+                          $out.= '<div class="container">
+                                  <div class="row">
+                                  <div class="rating">
+                                      <input type="radio" id="star5" name="rating" value="5" /><label for="star5">5 stars</label>
+                                      <input type="radio" id="star4" name="rating" value="4" /><label for="star4">4 stars</label>
+                                      <input type="radio" id="star3" name="rating" value="3" /><label for="star3" class="text-warning">3 stars</label>
+                                      <input type="radio" id="star2" name="rating" value="2" /><label for="star2" class="text-warning">2 stars</label>
+                                      <input type="radio" id="star1" name="rating" value="1" /><label for="star1" class="text-warning">1 star</label>
+                                    </div>
+                                    <small style="padding-top: 08px;">('.$total.' đã bán)</small>
+                                  </div>
+                                </div>';
+                              }else if($value->comments->avg('rate')>=4 && $value->comments->avg('rate')<5 ){
+                                $out.= '<div class="container">
+                                  <div class="row">
+                                  <div class="rating">
+                                      <input type="radio" id="star5" name="rating" value="5" /><label for="star5">5 stars</label>
+                                      <input type="radio" id="star4" name="rating" value="4" /><label for="star4" class="text-warning">4 stars</label>
+                                      <input type="radio" id="star3" name="rating" value="3" /><label for="star3" class="text-warning">3 stars</label>
+                                      <input type="radio" id="star2" name="rating" value="2" /><label for="star2" class="text-warning">2 stars</label>
+                                      <input type="radio" id="star1" name="rating" value="1" /><label for="star1" class="text-warning">1 star</label>
+                                    </div>
+                                    <small style="padding-top: 08px;">('.$total.' đã bán)</small>
+                                  </div>
+                                </div>';
+                              }
+                              else if($value->comments->avg('rate')==5){
+                                $out.= '<div class="container">
+                                  <div class="row">
+                                  <div class="rating">
+                                      <input type="radio" id="star5" name="rating" value="5" /><label for="star5" class="text-warning">5 stars</label>
+                                      <input type="radio" id="star4" name="rating" value="4" /><label for="star4" class="text-warning">4 stars</label>
+                                      <input type="radio" id="star3" name="rating" value="3" /><label for="star3" class="text-warning">3 stars</label>
+                                      <input type="radio" id="star2" name="rating" value="2" /><label for="star2" class="text-warning">2 stars</label>
+                                      <input type="radio" id="star1" name="rating" value="1" /><label for="star1" class="text-warning">1 star</label>
+                                    </div>
+                                    <small style="padding-top: 08px;">('.$total.' đã bán)</small>
+                                  </div>
+                                </div>';
+                              }else{
+                                $out.= '<div class="container">
+                                  <div class="row">
+                                  <div class="rating">
+                                      <input type="radio" id="star5" name="rating" value="5" /><label for="star5">5 stars</label>
+                                      <input type="radio" id="star4" name="rating" value="4" /><label for="star4">4 stars</label>
+                                      <input type="radio" id="star3" name="rating" value="3" /><label for="star3">3 stars</label>
+                                      <input type="radio" id="star2" name="rating" value="2" /><label for="star2">2 stars</label>
+                                      <input type="radio" id="star1" name="rating" value="1" /><label for="star1">1 star</label>
+                                    </div>
+                                    <small style="padding-top: 08px;">('.$total.' đã bán)</small>
+                                  </div>
+                                </div>';
+                              }
+                        $out.='</div>
+                              </div>
+                            </div>';
+
+                }
+                if(strtotime($today)< strtotime($start)  || strtotime($end)< strtotime($today)){
+                    $out.='
+                        <div class="col-sm-6 col-lg-4 mb-4" data-aos="fade-up">
+                        <div class="block-4 text-center border">
+                        <figure class="block-4-image" data-id="'.$value->id.'">
+                            <a href="http://phpshoes.com/user/showDetail/'.$value->id.'"><img src="http://phpshoes.com/upImage/'.$img.'" alt="Image placeholder" class="img-fluid"></a>
+                        </figure>
+                        <div class="block-4-text p-4">
+                          <h3><a href="http://phpshoes.com/user/showDetail/'.$value->id.'" data-id="'.$value->id.'">'.$value->name.'</a></h3>
+                          <p class="text-primary font-weight-bold text-left text-danger mt-3" data-id="'.$value->id.'">'.number_format($value->price).' vnđ</p>
+                        
                     
                     ';
+                    if($value->comments->avg('rate')>=1 && $value->comments->avg('rate')<2 ){
+                        $out.='<div class="container">
+                                  <div class="row">
+                                  <div class="rating">
+                                      <input type="radio" id="star5" name="rating" value="5" /><label for="star5">5 stars</label>
+                                      <input type="radio" id="star4" name="rating" value="4" /><label for="star4">4 stars</label>
+                                      <input type="radio" id="star3" name="rating" value="3" /><label for="star3">3 stars</label>
+                                      <input type="radio" id="star2" name="rating" value="2" /><label for="star2">2 stars</label>
+                                      <input type="radio" id="star1" name="rating" value="1" /><label for="star1" class="text-warning">1 star</label>
+                                    </div>
+                                    <small style="padding-top: 08px;">('.$total.' đã bán)</small>
+                                  </div>
+                                </div>';
+                    }
+                    else if($value->comments->avg('rate')>=2 && $value->comments->avg('rate')<3 ){
+                          $out.= '<div class="container">
+                                  <div class="row">
+                                  <div class="rating">
+                                      <input type="radio" id="star5" name="rating" value="5" /><label for="star5">5 stars</label>
+                                      <input type="radio" id="star4" name="rating" value="4" /><label for="star4">4 stars</label>
+                                      <input type="radio" id="star3" name="rating" value="3" /><label for="star3">3 stars</label>
+                                      <input type="radio" id="star2" name="rating" value="2" /><label for="star2" class="text-warning">2 stars</label>
+                                      <input type="radio" id="star1" name="rating" value="1" /><label for="star1" class="text-warning">1 star</label>
+                                    </div>
+                                    <small style="padding-top: 08px;">('.$total.' đã bán)</small>
+                                  </div>
+                                </div>';
+                        }
+                        else if($value->comments->avg('rate')>=3 && $value->comments->avg('rate')<4 ){
+                          $out.= '<div class="container">
+                                  <div class="row">
+                                  <div class="rating">
+                                      <input type="radio" id="star5" name="rating" value="5" /><label for="star5">5 stars</label>
+                                      <input type="radio" id="star4" name="rating" value="4" /><label for="star4">4 stars</label>
+                                      <input type="radio" id="star3" name="rating" value="3" /><label for="star3" class="text-warning">3 stars</label>
+                                      <input type="radio" id="star2" name="rating" value="2" /><label for="star2" class="text-warning">2 stars</label>
+                                      <input type="radio" id="star1" name="rating" value="1" /><label for="star1" class="text-warning">1 star</label>
+                                    </div>
+                                    <small style="padding-top: 08px;">('.$total.' đã bán)</small>
+                                  </div>
+                                </div>';
+                              }else if($value->comments->avg('rate')>=4 && $value->comments->avg('rate')<5 ){
+                                $out.= '<div class="container">
+                                  <div class="row">
+                                  <div class="rating">
+                                      <input type="radio" id="star5" name="rating" value="5" /><label for="star5">5 stars</label>
+                                      <input type="radio" id="star4" name="rating" value="4" /><label for="star4" class="text-warning">4 stars</label>
+                                      <input type="radio" id="star3" name="rating" value="3" /><label for="star3" class="text-warning">3 stars</label>
+                                      <input type="radio" id="star2" name="rating" value="2" /><label for="star2" class="text-warning">2 stars</label>
+                                      <input type="radio" id="star1" name="rating" value="1" /><label for="star1" class="text-warning">1 star</label>
+                                    </div>
+                                    <small style="padding-top: 08px;">('.$total.' đã bán)</small>
+                                  </div>
+                                </div>';
+                              }
+                              else if($value->comments->avg('rate')==5){
+                                $out.= '<div class="container">
+                                  <div class="row">
+                                  <div class="rating">
+                                      <input type="radio" id="star5" name="rating" value="5" /><label for="star5" class="text-warning">5 stars</label>
+                                      <input type="radio" id="star4" name="rating" value="4" /><label for="star4" class="text-warning">4 stars</label>
+                                      <input type="radio" id="star3" name="rating" value="3" /><label for="star3" class="text-warning">3 stars</label>
+                                      <input type="radio" id="star2" name="rating" value="2" /><label for="star2" class="text-warning">2 stars</label>
+                                      <input type="radio" id="star1" name="rating" value="1" /><label for="star1" class="text-warning">1 star</label>
+                                    </div>
+                                    <small style="padding-top: 08px;">('.$total.' đã bán)</small>
+                                  </div>
+                                </div>';
+                              }else{
+                                $out.= '<div class="container">
+                                  <div class="row">
+                                  <div class="rating">
+                                      <input type="radio" id="star5" name="rating" value="5" /><label for="star5">5 stars</label>
+                                      <input type="radio" id="star4" name="rating" value="4" /><label for="star4">4 stars</label>
+                                      <input type="radio" id="star3" name="rating" value="3" /><label for="star3">3 stars</label>
+                                      <input type="radio" id="star2" name="rating" value="2" /><label for="star2">2 stars</label>
+                                      <input type="radio" id="star1" name="rating" value="1" /><label for="star1">1 star</label>
+                                    </div>
+                                    <small style="padding-top: 08px;">('.$total.' đã bán)</small>
+                                  </div>
+                                </div>';
+                              }
+                            $out.='</div>
+                              </div>
+                            </div>';
+                }
             }
-             return response()->json($out,200);
         }else{
-            $err = "không tìm thấy sản phẩm";
-             return response()->json($err,400);
+            $out = "không tìm thấy sản phẩm";
+             
         }
+        return response()->json($out);
     }
 
 
@@ -225,6 +446,12 @@ class LoadPageController extends Controller
                    $img = $val->path;
                    break;
                 }
+                $total=0;
+                foreach ($value->orders as $key => $val) {
+                  if($value->id == $val->pivot->product_id){
+                    $total+=$val->pivot->quantity;
+                  }
+                }
                 if(strtotime($today) >= strtotime($start) && strtotime($end)>=strtotime($today)){
                     $quantity = $value->price-($value->price* $value->promotion->unit/100);
                     $out.='
@@ -237,11 +464,93 @@ class LoadPageController extends Controller
                           <h3><a href="http://phpshoes.com/user/showDetail/'.$value->id.'" data-id="'.$value->id.'">'.$value->name.'</a></h3>
                           <p class="text-primary font-weight-bold text-left text-danger mt-3" data-id="'.$value->id.'">'.number_format($quantity).' vnđ</p>
                           <p class="text-left"><strike>đ '.number_format($value->price).'</strike>&nbsp;&nbsp;-'.$value->promotion->unit.'%</p>
-                        </div>
-                      </div>
-                    </div>
-                    
                     ';
+                    if($value->comments->avg('rate')>=1 && $value->comments->avg('rate')<2 ){
+                        $out.='<div class="container">
+                                  <div class="row">
+                                  <div class="rating">
+                                      <input type="radio" id="star5" name="rating" value="5" /><label for="star5">5 stars</label>
+                                      <input type="radio" id="star4" name="rating" value="4" /><label for="star4">4 stars</label>
+                                      <input type="radio" id="star3" name="rating" value="3" /><label for="star3">3 stars</label>
+                                      <input type="radio" id="star2" name="rating" value="2" /><label for="star2">2 stars</label>
+                                      <input type="radio" id="star1" name="rating" value="1" /><label for="star1" class="text-warning">1 star</label>
+                                    </div>
+                                    <small style="padding-top: 08px;">('.$total.' đã bán)</small>
+                                  </div>
+                                </div>';
+                    }
+                    else if($value->comments->avg('rate')>=2 && $value->comments->avg('rate')<3 ){
+                          $out.= '<div class="container">
+                                  <div class="row">
+                                  <div class="rating">
+                                      <input type="radio" id="star5" name="rating" value="5" /><label for="star5">5 stars</label>
+                                      <input type="radio" id="star4" name="rating" value="4" /><label for="star4">4 stars</label>
+                                      <input type="radio" id="star3" name="rating" value="3" /><label for="star3">3 stars</label>
+                                      <input type="radio" id="star2" name="rating" value="2" /><label for="star2" class="text-warning">2 stars</label>
+                                      <input type="radio" id="star1" name="rating" value="1" /><label for="star1" class="text-warning">1 star</label>
+                                    </div>
+                                    <small style="padding-top: 08px;">('.$total.' đã bán)</small>
+                                  </div>
+                                </div>';
+                        }
+                        else if($value->comments->avg('rate')>=3 && $value->comments->avg('rate')<4 ){
+                          $out.= '<div class="container">
+                                  <div class="row">
+                                  <div class="rating">
+                                      <input type="radio" id="star5" name="rating" value="5" /><label for="star5">5 stars</label>
+                                      <input type="radio" id="star4" name="rating" value="4" /><label for="star4">4 stars</label>
+                                      <input type="radio" id="star3" name="rating" value="3" /><label for="star3" class="text-warning">3 stars</label>
+                                      <input type="radio" id="star2" name="rating" value="2" /><label for="star2" class="text-warning">2 stars</label>
+                                      <input type="radio" id="star1" name="rating" value="1" /><label for="star1" class="text-warning">1 star</label>
+                                    </div>
+                                    <small style="padding-top: 08px;">('.$total.' đã bán)</small>
+                                  </div>
+                                </div>';
+                              }else if($value->comments->avg('rate')>=4 && $value->comments->avg('rate')<5 ){
+                                $out.= '<div class="container">
+                                  <div class="row">
+                                  <div class="rating">
+                                      <input type="radio" id="star5" name="rating" value="5" /><label for="star5">5 stars</label>
+                                      <input type="radio" id="star4" name="rating" value="4" /><label for="star4" class="text-warning">4 stars</label>
+                                      <input type="radio" id="star3" name="rating" value="3" /><label for="star3" class="text-warning">3 stars</label>
+                                      <input type="radio" id="star2" name="rating" value="2" /><label for="star2" class="text-warning">2 stars</label>
+                                      <input type="radio" id="star1" name="rating" value="1" /><label for="star1" class="text-warning">1 star</label>
+                                    </div>
+                                    <small style="padding-top: 08px;">('.$total.' đã bán)</small>
+                                  </div>
+                                </div>';
+                              }
+                              else if($value->comments->avg('rate')==5){
+                                $out.= '<div class="container">
+                                  <div class="row">
+                                  <div class="rating">
+                                      <input type="radio" id="star5" name="rating" value="5" /><label for="star5" class="text-warning">5 stars</label>
+                                      <input type="radio" id="star4" name="rating" value="4" /><label for="star4" class="text-warning">4 stars</label>
+                                      <input type="radio" id="star3" name="rating" value="3" /><label for="star3" class="text-warning">3 stars</label>
+                                      <input type="radio" id="star2" name="rating" value="2" /><label for="star2" class="text-warning">2 stars</label>
+                                      <input type="radio" id="star1" name="rating" value="1" /><label for="star1" class="text-warning">1 star</label>
+                                    </div>
+                                    <small style="padding-top: 08px;">('.$total.' đã bán)</small>
+                                  </div>
+                                </div>';
+                              }else{
+                                $out.= '<div class="container">
+                                  <div class="row">
+                                  <div class="rating">
+                                      <input type="radio" id="star5" name="rating" value="5" /><label for="star5">5 stars</label>
+                                      <input type="radio" id="star4" name="rating" value="4" /><label for="star4">4 stars</label>
+                                      <input type="radio" id="star3" name="rating" value="3" /><label for="star3">3 stars</label>
+                                      <input type="radio" id="star2" name="rating" value="2" /><label for="star2">2 stars</label>
+                                      <input type="radio" id="star1" name="rating" value="1" /><label for="star1">1 star</label>
+                                    </div>
+                                    <small style="padding-top: 08px;">('.$total.' đã bán)</small>
+                                  </div>
+                                </div>';
+                              }
+                        $out.='</div>
+                              </div>
+                            </div>';
+
                 }
                 if(strtotime($today)< strtotime($start)  || strtotime($end)< strtotime($today)){
                     $out.='
@@ -253,11 +562,94 @@ class LoadPageController extends Controller
                         <div class="block-4-text p-4">
                           <h3><a href="http://phpshoes.com/user/showDetail/'.$value->id.'" data-id="'.$value->id.'">'.$value->name.'</a></h3>
                           <p class="text-primary font-weight-bold text-left text-danger mt-3" data-id="'.$value->id.'">'.number_format($value->price).' vnđ</p>
-                        </div>
-                      </div>
-                    </div>
+                        
                     
                     ';
+                    if($value->comments->avg('rate')>=1 && $value->comments->avg('rate')<2 ){
+                        $out.='<div class="container">
+                                  <div class="row">
+                                  <div class="rating">
+                                      <input type="radio" id="star5" name="rating" value="5" /><label for="star5">5 stars</label>
+                                      <input type="radio" id="star4" name="rating" value="4" /><label for="star4">4 stars</label>
+                                      <input type="radio" id="star3" name="rating" value="3" /><label for="star3">3 stars</label>
+                                      <input type="radio" id="star2" name="rating" value="2" /><label for="star2">2 stars</label>
+                                      <input type="radio" id="star1" name="rating" value="1" /><label for="star1" class="text-warning">1 star</label>
+                                    </div>
+                                    <small style="padding-top: 08px;">('.$total.' đã bán)</small>
+                                  </div>
+                                </div>';
+                    }
+                    else if($value->comments->avg('rate')>=2 && $value->comments->avg('rate')<3 ){
+                          $out.= '<div class="container">
+                                  <div class="row">
+                                  <div class="rating">
+                                      <input type="radio" id="star5" name="rating" value="5" /><label for="star5">5 stars</label>
+                                      <input type="radio" id="star4" name="rating" value="4" /><label for="star4">4 stars</label>
+                                      <input type="radio" id="star3" name="rating" value="3" /><label for="star3">3 stars</label>
+                                      <input type="radio" id="star2" name="rating" value="2" /><label for="star2" class="text-warning">2 stars</label>
+                                      <input type="radio" id="star1" name="rating" value="1" /><label for="star1" class="text-warning">1 star</label>
+                                    </div>
+                                    <small style="padding-top: 08px;">('.$total.' đã bán)</small>
+                                  </div>
+                                </div>';
+                        }
+                        else if($value->comments->avg('rate')>=3 && $value->comments->avg('rate')<4 ){
+                          $out.= '<div class="container">
+                                  <div class="row">
+                                  <div class="rating">
+                                      <input type="radio" id="star5" name="rating" value="5" /><label for="star5">5 stars</label>
+                                      <input type="radio" id="star4" name="rating" value="4" /><label for="star4">4 stars</label>
+                                      <input type="radio" id="star3" name="rating" value="3" /><label for="star3" class="text-warning">3 stars</label>
+                                      <input type="radio" id="star2" name="rating" value="2" /><label for="star2" class="text-warning">2 stars</label>
+                                      <input type="radio" id="star1" name="rating" value="1" /><label for="star1" class="text-warning">1 star</label>
+                                    </div>
+                                    <small style="padding-top: 08px;">('.$total.' đã bán)</small>
+                                  </div>
+                                </div>';
+                              }else if($value->comments->avg('rate')>=4 && $value->comments->avg('rate')<5 ){
+                                $out.= '<div class="container">
+                                  <div class="row">
+                                  <div class="rating">
+                                      <input type="radio" id="star5" name="rating" value="5" /><label for="star5">5 stars</label>
+                                      <input type="radio" id="star4" name="rating" value="4" /><label for="star4" class="text-warning">4 stars</label>
+                                      <input type="radio" id="star3" name="rating" value="3" /><label for="star3" class="text-warning">3 stars</label>
+                                      <input type="radio" id="star2" name="rating" value="2" /><label for="star2" class="text-warning">2 stars</label>
+                                      <input type="radio" id="star1" name="rating" value="1" /><label for="star1" class="text-warning">1 star</label>
+                                    </div>
+                                    <small style="padding-top: 08px;">('.$total.' đã bán)</small>
+                                  </div>
+                                </div>';
+                              }
+                              else if($value->comments->avg('rate')==5){
+                                $out.= '<div class="container">
+                                  <div class="row">
+                                  <div class="rating">
+                                      <input type="radio" id="star5" name="rating" value="5" /><label for="star5" class="text-warning">5 stars</label>
+                                      <input type="radio" id="star4" name="rating" value="4" /><label for="star4" class="text-warning">4 stars</label>
+                                      <input type="radio" id="star3" name="rating" value="3" /><label for="star3" class="text-warning">3 stars</label>
+                                      <input type="radio" id="star2" name="rating" value="2" /><label for="star2" class="text-warning">2 stars</label>
+                                      <input type="radio" id="star1" name="rating" value="1" /><label for="star1" class="text-warning">1 star</label>
+                                    </div>
+                                    <small style="padding-top: 08px;">('.$total.' đã bán)</small>
+                                  </div>
+                                </div>';
+                              }else{
+                                $out.= '<div class="container">
+                                  <div class="row">
+                                  <div class="rating">
+                                      <input type="radio" id="star5" name="rating" value="5" /><label for="star5">5 stars</label>
+                                      <input type="radio" id="star4" name="rating" value="4" /><label for="star4">4 stars</label>
+                                      <input type="radio" id="star3" name="rating" value="3" /><label for="star3">3 stars</label>
+                                      <input type="radio" id="star2" name="rating" value="2" /><label for="star2">2 stars</label>
+                                      <input type="radio" id="star1" name="rating" value="1" /><label for="star1">1 star</label>
+                                    </div>
+                                    <small style="padding-top: 08px;">('.$total.' đã bán)</small>
+                                  </div>
+                                </div>';
+                              }
+                            $out.='</div>
+                              </div>
+                            </div>';
                 }
             }
         }else{
@@ -267,7 +659,7 @@ class LoadPageController extends Controller
     }
 
 
-    // start seach with size
+    // start seach with search size
     public function searchSize($id){
         $size=Size::findOrFail($id);
         foreach ($size->products as $key => $value) {
@@ -280,8 +672,13 @@ class LoadPageController extends Controller
                  foreach ($product->images as $key => $vl) {
                      $img = $vl->path;
                      break;
-                 }
-
+                }
+                $total=0;
+                foreach ($product->orders as $key => $vl) {
+                    if($vl->pivot->size==$id){
+                        $total+=$vl->pivot->quantity;
+                    }
+                }             
                 $end =  $product->promotion->end;
                 $start =  $product->promotion->start;
                 $today = date('Y-m-d');
@@ -298,11 +695,92 @@ class LoadPageController extends Controller
                           <h3><a href="http://phpshoes.com/user/showDetail/'.$product->id.'" data-id="'.$product->id.'">'.$product->name.'</a></h3>
                           <p class="text-primary font-weight-bold text-left text-danger mt-3" data-id="'.$product->id.'">'.number_format($quantity).' vnđ</p>
                           <p class="text-left"><strike>đ '.number_format($product->price).'</strike>&nbsp;&nbsp;-'.$product->promotion->unit.'%</p>
-                        </div>
-                      </div>
-                    </div>
-                    
                     ';
+                    if($product->comments->avg('rate')>=1 && $product->comments->avg('rate')<2 ){
+                        $out.='<div class="container">
+                                  <div class="row">
+                                  <div class="rating">
+                                      <input type="radio" id="star5" name="rating" value="5" /><label for="star5">5 stars</label>
+                                      <input type="radio" id="star4" name="rating" value="4" /><label for="star4">4 stars</label>
+                                      <input type="radio" id="star3" name="rating" value="3" /><label for="star3">3 stars</label>
+                                      <input type="radio" id="star2" name="rating" value="2" /><label for="star2">2 stars</label>
+                                      <input type="radio" id="star1" name="rating" value="1" /><label for="star1" class="text-warning">1 star</label>
+                                    </div>
+                                    <small style="padding-top: 08px;">('.$total.' đã bán)</small>
+                                  </div>
+                                </div>';
+                    }
+                    else if($product->comments->avg('rate')>=2 && $product->comments->avg('rate')<3 ){
+                          $out.= '<div class="container">
+                                  <div class="row">
+                                  <div class="rating">
+                                      <input type="radio" id="star5" name="rating" value="5" /><label for="star5">5 stars</label>
+                                      <input type="radio" id="star4" name="rating" value="4" /><label for="star4">4 stars</label>
+                                      <input type="radio" id="star3" name="rating" value="3" /><label for="star3">3 stars</label>
+                                      <input type="radio" id="star2" name="rating" value="2" /><label for="star2" class="text-warning">2 stars</label>
+                                      <input type="radio" id="star1" name="rating" value="1" /><label for="star1" class="text-warning">1 star</label>
+                                    </div>
+                                    <small style="padding-top: 08px;">('.$total.' đã bán)</small>
+                                  </div>
+                                </div>';
+                        }
+                        else if($product->comments->avg('rate')>=3 && $product->comments->avg('rate')<4 ){
+                          $out.= '<div class="container">
+                                  <div class="row">
+                                  <div class="rating">
+                                      <input type="radio" id="star5" name="rating" value="5" /><label for="star5">5 stars</label>
+                                      <input type="radio" id="star4" name="rating" value="4" /><label for="star4">4 stars</label>
+                                      <input type="radio" id="star3" name="rating" value="3" /><label for="star3" class="text-warning">3 stars</label>
+                                      <input type="radio" id="star2" name="rating" value="2" /><label for="star2" class="text-warning">2 stars</label>
+                                      <input type="radio" id="star1" name="rating" value="1" /><label for="star1" class="text-warning">1 star</label>
+                                    </div>
+                                    <small style="padding-top: 08px;">('.$total.' đã bán)</small>
+                                  </div>
+                                </div>';
+                              }else if($product->comments->avg('rate')>=4 && $product->comments->avg('rate')<5 ){
+                                $out.= '<div class="container">
+                                  <div class="row">
+                                  <div class="rating">
+                                      <input type="radio" id="star5" name="rating" value="5" /><label for="star5">5 stars</label>
+                                      <input type="radio" id="star4" name="rating" value="4" /><label for="star4" class="text-warning">4 stars</label>
+                                      <input type="radio" id="star3" name="rating" value="3" /><label for="star3" class="text-warning">3 stars</label>
+                                      <input type="radio" id="star2" name="rating" value="2" /><label for="star2" class="text-warning">2 stars</label>
+                                      <input type="radio" id="star1" name="rating" value="1" /><label for="star1" class="text-warning">1 star</label>
+                                    </div>
+                                    <small style="padding-top: 08px;">('.$total.' đã bán)</small>
+                                  </div>
+                                </div>';
+                              }
+                              else if($product->comments->avg('rate')==5){
+                                $out.= '<div class="container">
+                                  <div class="row">
+                                  <div class="rating">
+                                      <input type="radio" id="star5" name="rating" value="5" /><label for="star5" class="text-warning">5 stars</label>
+                                      <input type="radio" id="star4" name="rating" value="4" /><label for="star4" class="text-warning">4 stars</label>
+                                      <input type="radio" id="star3" name="rating" value="3" /><label for="star3" class="text-warning">3 stars</label>
+                                      <input type="radio" id="star2" name="rating" value="2" /><label for="star2" class="text-warning">2 stars</label>
+                                      <input type="radio" id="star1" name="rating" value="1" /><label for="star1" class="text-warning">1 star</label>
+                                    </div>
+                                    <small style="padding-top: 08px;">('.$total.' đã bán)</small>
+                                  </div>
+                                </div>';
+                              }else{
+                                $out.= '<div class="container">
+                                  <div class="row">
+                                  <div class="rating">
+                                      <input type="radio" id="star5" name="rating" value="5" /><label for="star5">5 stars</label>
+                                      <input type="radio" id="star4" name="rating" value="4" /><label for="star4">4 stars</label>
+                                      <input type="radio" id="star3" name="rating" value="3" /><label for="star3">3 stars</label>
+                                      <input type="radio" id="star2" name="rating" value="2" /><label for="star2">2 stars</label>
+                                      <input type="radio" id="star1" name="rating" value="1" /><label for="star1">1 star</label>
+                                    </div>
+                                    <small style="padding-top: 08px;">('.$total.' đã bán)</small>
+                                  </div>
+                                </div>';
+                              }
+                    $out.='</div>
+                      </div>
+                    </div>';
                 }
                 
                 if(strtotime($today)< strtotime($start)  || strtotime($end)< strtotime($today)){
@@ -315,11 +793,92 @@ class LoadPageController extends Controller
                         <div class="block-4-text p-4">
                           <h3><a href="http://phpshoes.com/user/showDetail/'.$product->id.'" data-id="'.$product->id.'">'.$product->name.'</a></h3>
                           <p class="text-primary font-weight-bold text-left text-danger mt-3" data-id="'.$product->id.'">'.number_format($product->price).' vnđ</p>
-                        </div>
-                      </div>
-                    </div>
-                    
                     ';
+                    if($product->comments->avg('rate')>=1 && $product->comments->avg('rate')<2 ){
+                        $out.='<div class="container">
+                                  <div class="row">
+                                  <div class="rating">
+                                      <input type="radio" id="star5" name="rating" value="5" /><label for="star5">5 stars</label>
+                                      <input type="radio" id="star4" name="rating" value="4" /><label for="star4">4 stars</label>
+                                      <input type="radio" id="star3" name="rating" value="3" /><label for="star3">3 stars</label>
+                                      <input type="radio" id="star2" name="rating" value="2" /><label for="star2">2 stars</label>
+                                      <input type="radio" id="star1" name="rating" value="1" /><label for="star1" class="text-warning">1 star</label>
+                                    </div>
+                                    <small style="padding-top: 08px;">('.$total.' đã bán)</small>
+                                  </div>
+                                </div>';
+                    }
+                    else if($product->comments->avg('rate')>=2 && $product->comments->avg('rate')<3 ){
+                          $out.= '<div class="container">
+                                  <div class="row">
+                                  <div class="rating">
+                                      <input type="radio" id="star5" name="rating" value="5" /><label for="star5">5 stars</label>
+                                      <input type="radio" id="star4" name="rating" value="4" /><label for="star4">4 stars</label>
+                                      <input type="radio" id="star3" name="rating" value="3" /><label for="star3">3 stars</label>
+                                      <input type="radio" id="star2" name="rating" value="2" /><label for="star2" class="text-warning">2 stars</label>
+                                      <input type="radio" id="star1" name="rating" value="1" /><label for="star1" class="text-warning">1 star</label>
+                                    </div>
+                                    <small style="padding-top: 08px;">('.$total.' đã bán)</small>
+                                  </div>
+                                </div>';
+                        }
+                        else if($product->comments->avg('rate')>=3 && $product->comments->avg('rate')<4 ){
+                          $out.= '<div class="container">
+                                  <div class="row">
+                                  <div class="rating">
+                                      <input type="radio" id="star5" name="rating" value="5" /><label for="star5">5 stars</label>
+                                      <input type="radio" id="star4" name="rating" value="4" /><label for="star4">4 stars</label>
+                                      <input type="radio" id="star3" name="rating" value="3" /><label for="star3" class="text-warning">3 stars</label>
+                                      <input type="radio" id="star2" name="rating" value="2" /><label for="star2" class="text-warning">2 stars</label>
+                                      <input type="radio" id="star1" name="rating" value="1" /><label for="star1" class="text-warning">1 star</label>
+                                    </div>
+                                    <small style="padding-top: 08px;">('.$total.' đã bán)</small>
+                                  </div>
+                                </div>';
+                              }else if($product->comments->avg('rate')>=4 && $product->comments->avg('rate')<5 ){
+                                $out.= '<div class="container">
+                                  <div class="row">
+                                  <div class="rating">
+                                      <input type="radio" id="star5" name="rating" value="5" /><label for="star5">5 stars</label>
+                                      <input type="radio" id="star4" name="rating" value="4" /><label for="star4" class="text-warning">4 stars</label>
+                                      <input type="radio" id="star3" name="rating" value="3" /><label for="star3" class="text-warning">3 stars</label>
+                                      <input type="radio" id="star2" name="rating" value="2" /><label for="star2" class="text-warning">2 stars</label>
+                                      <input type="radio" id="star1" name="rating" value="1" /><label for="star1" class="text-warning">1 star</label>
+                                    </div>
+                                    <small style="padding-top: 08px;">('.$total.' đã bán)</small>
+                                  </div>
+                                </div>';
+                              }
+                              else if($product->comments->avg('rate')==5){
+                                $out.= '<div class="container">
+                                  <div class="row">
+                                  <div class="rating">
+                                      <input type="radio" id="star5" name="rating" value="5" /><label for="star5" class="text-warning">5 stars</label>
+                                      <input type="radio" id="star4" name="rating" value="4" /><label for="star4" class="text-warning">4 stars</label>
+                                      <input type="radio" id="star3" name="rating" value="3" /><label for="star3" class="text-warning">3 stars</label>
+                                      <input type="radio" id="star2" name="rating" value="2" /><label for="star2" class="text-warning">2 stars</label>
+                                      <input type="radio" id="star1" name="rating" value="1" /><label for="star1" class="text-warning">1 star</label>
+                                    </div>
+                                    <small style="padding-top: 08px;">('.$total.' đã bán)</small>
+                                  </div>
+                                </div>';
+                              }else{
+                                $out.= '<div class="container">
+                                  <div class="row">
+                                  <div class="rating">
+                                      <input type="radio" id="star5" name="rating" value="5" /><label for="star5">5 stars</label>
+                                      <input type="radio" id="star4" name="rating" value="4" /><label for="star4">4 stars</label>
+                                      <input type="radio" id="star3" name="rating" value="3" /><label for="star3">3 stars</label>
+                                      <input type="radio" id="star2" name="rating" value="2" /><label for="star2">2 stars</label>
+                                      <input type="radio" id="star1" name="rating" value="1" /><label for="star1">1 star</label>
+                                    </div>
+                                    <small style="padding-top: 08px;">('.$total.' đã bán)</small>
+                                  </div>
+                                </div>';
+                              }
+                    $out.='</div>
+                      </div>
+                    </div>';
                     
                 }
 
@@ -343,9 +902,11 @@ class LoadPageController extends Controller
     // start show detail product
     public function showDetail($id){
         $product=Product::find($id);
+        $comment = Comment::where('product_id','=',$id)->orderBy('id','asc')->paginate(4);
+        $comments=Comment::where('product_id','=',$id)->get();
         $category=$product->category_id;
-        $categoryAll = Product::where('category_id','like',$category)->get();
-        return view('user.detailProduct',compact('product','categoryAll'));
+        $categoryAll = Product::where('category_id','=',$category)->get();
+        return view('user.detailProduct',compact('product','categoryAll','comment','comments'));
     }
     /**
      * Display a listing of the resource.

@@ -191,7 +191,7 @@
                       ?>
                       <tr>
                         <td class="text-black font-weight-bold"><strong>Cart Subtotal</strong></td>
-                        <td class="text-black">{{$total}}</td>
+                        <td class="text-black"><?php echo $total; ?></td>
                       </tr>
                       <tr>
                         <td class="text-black font-weight-bold"><strong>Order Total</strong></td>

@@ -36,6 +36,9 @@ class Product extends Model
         return $this->belongsToMany('App\User','comments','product_id','user_id')->withPivot('rate','content','status')->withTimestamps();
     }
 
+    public function comments(){
+        return $this->hasMany('App\Comment');
+    }
     public function orders(){
         return $this->belongsToMany('App\Order','order__products','product_id','order_id')->withPivot('quantity','price','size')->withTimestamps();
     }

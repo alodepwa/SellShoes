@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Order;
 use App\Size;
 use App\Product;
+use Mail;
+use App\Mail\SendMailOrder;
 use Illuminate\Http\Request;
 
 class OrderController extends Controller
@@ -23,23 +25,127 @@ class OrderController extends Controller
             foreach ($price->sizes as $key => $value) {
                 if($size[$i]==$value->pivot->size_id){
                     $sl[$i]=$value->pivot->quantity;
-                    if($quantity[$i]<$sl){
-                        $newQuantity[$i] = $sl[$i]-$quantity[$i];
-                        $update[$size[$i]]=['quantity'=>$newQuantity[$i]];
+                    if($quantity[$i]<=$sl[$i]){
+                        $newQuantity = $sl[$i]-$quantity[$i];
+                        $update[$size[$i]]=['quantity'=>$newQuantity];
+                        $price->sizes()->syncWithoutDetaching($update);
+                        $order =Order::findOrFail($id); 
+                        $order['status']=2;
+                        $order->save();
+                        $result="Thêm mới thành công vào order";
                     }else{
                         $result="số lượng trong kho không đủ";
                         break;
                     }
                 }
             }
-            if(count($update)>0){
-                $price->sizes()->syncWithoutDetaching($update);
-                $order =Order::findOrFail($id); 
-                $order['status']=2;
-                $order->save();
-                $result="Thêm mới thành công vào order";
-            }
         }   
+        return response()->json($result);
+    }
+    public function loadListOrder(Request $request){
+        $value = $request->value;
+        $order = Order::where('status','=',$value)->paginate(7);
+        $size = Size::all();
+        $out='';
+        if($value==1){
+            foreach ($order as $key => $value) {
+                $out.='<tr><td>'.$value->id.'</td><td>'.$value->name.'</td><td >'.$value->email.'</td><td>';
+                foreach($value->products as $vl){
+                    $out.='<p class="'.$value->id.'product" data-id="'.$vl->id.'">'.$vl->name.'</p>';
+                }
+                $out.='</td><td>';
+                foreach ($value->products as $quantity) {
+                            $out.='<p class="'.$value->id.'quantity" data-id="'.$quantity->pivot->quantity.'">'.$quantity->pivot->quantity.'</p>';
+                }
+                $out.='</td><td>';
+                foreach ($value->products as $quantity) {
+                    $out.='<p>'.$quantity->pivot->price.'</p>';
+                }
+                $out.='</td><td>';
+                foreach ($value->products as $vl) {
+                    $checkSize = $vl->pivot->size;
+                    foreach ($size as $key => $vl) {
+                    if($checkSize == $vl->id){
+                        $out.= '<p class="'.$value->id.'size" data-id='.$vl->id.'>'.$vl->name.'</p>';
+                    }
+                }
+                    
+                }
+                $out.='</td>
+                            <td>
+                                <button class="btn-info yes" data-id="'.$value->id.'">yes</button>
+                                <button class="btn-danger no" data-id="'.$value->id.'">no</button>
+                            </td>
+                        </tr>';
+            }
+        }else if($value==2){
+            foreach ($order as $key => $value) {
+                $out.='<tr><td>'.$value->id.'</td><td>'.$value->name.'</td><td >'.$value->email.'</td><td>';
+                foreach($value->products as $vl){
+                    $out.='<p class="'.$value->id.'product" data-id="'.$vl->id.'">'.$vl->name.'</p>';
+                }
+                $out.='</td><td>';
+                foreach ($value->products as $quantity) {
+                            $out.='<p class="'.$value->id.'quantity" data-id="'.$quantity->pivot->quantity.'">'.$quantity->pivot->quantity.'</p>';
+                }
+                $out.='</td><td>';
+                foreach ($value->products as $quantity) {
+                    $out.='<p>'.$quantity->pivot->price.'</p>';
+                }
+                $out.='</td><td>';
+                foreach ($value->products as $vl) {
+                    $checkSize = $vl->pivot->size;
+                    foreach ($size as $key => $vl) {
+                    if($checkSize == $vl->id){
+                        $out.= '<p class="'.$value->id.'size" data-id='.$vl->id.'>'.$vl->name.'</p>';
+                    }
+                }
+                    
+                }
+                $out.='</td>
+                            <td>
+                                <p class="text-primary">Đang giao hàng</p>
+                            </td>
+                        </tr>';
+            }
+        }else{
+            foreach ($order as $key => $value) {
+                $out.='<tr><td>'.$value->id.'</td><td>'.$value->name.'</td><td >'.$value->email.'</td><td>';
+                foreach($value->products as $vl){
+                    $out.='<p class="'.$value->id.'product" data-id="'.$vl->id.'">'.$vl->name.'</p>';
+                }
+                $out.='</td><td>';
+                foreach ($value->products as $quantity) {
+                            $out.='<p class="'.$value->id.'quantity" data-id="'.$quantity->pivot->quantity.'">'.$quantity->pivot->quantity.'</p>';
+                }
+                $out.='</td><td>';
+                foreach ($value->products as $quantity) {
+                    $out.='<p>'.$quantity->pivot->price.'</p>';
+                }
+                $out.='</td><td>';
+                foreach ($value->products as $vl) {
+                    $checkSize = $vl->pivot->size;
+                    foreach ($size as $key => $vl) {
+                    if($checkSize == $vl->id){
+                        $out.= '<p class="'.$value->id.'size" data-id='.$vl->id.'>'.$vl->name.'</p>';
+                    }
+                }
+                    
+                }
+                $out.='</td>
+                            <td>
+                                <p class="text-danger">Đơn hàng đã hủy.</p>
+                            </td>
+                        </tr>';
+            }
+        }
+        $paginate='<div class="row">
+            <div class="col-12 d-flex justify-content-center" id="pageAdd">
+                '.$order->links().'
+            </div>
+        </div>';
+        $result =['out'=>$out,'paginate'=>$paginate];
+
         return response()->json($result);
     }
     /**
@@ -57,7 +163,7 @@ class OrderController extends Controller
                 $order3=$value->pivot->status;
             }
         }
-         $list  = Order::where('status','=',2)->paginate(7);
+        $list  = Order::where('status','=',2)->paginate(7);
         return view('admin.listOrder',compact('order','size','list'));
     }
 
@@ -125,9 +231,17 @@ class OrderController extends Controller
     public function destroy($id)
     {
         $order = Order::findOrFail($id);
+        foreach ($order->products as $key => $value) {
+            $productID = $value->id;
+        }
+        $product = Product::findOrFail($productID);
+        foreach ($product->images as $key => $value) {
+            $path = $value->path;
+        }
         if($order->delete()){
-           $order->products()->detach();
-           $result="Đã loại bỏ đơn hàng";
+            Mail::to($order->email)->send(new SendMailOrder($order,$path));
+            $order->products()->detach();
+            $result="Đã loại bỏ đơn hàng";
         }
         return response()->json($result);
     }

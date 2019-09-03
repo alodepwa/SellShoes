@@ -16,26 +16,27 @@
 @endsection
 
 @section('content')
-<div class="contentCate " >
-<div class="breadcrumbs">
+	<div class="contentCate " >
+		<div class="breadcrumbs">
             <div class="col-sm-4">
                 <div class="page-header float-left">
                     <div class="page-title">
-                        <h1>List Comments</h1>
+                        <h1>List Orders</h1>
                     </div>
                 </div>
             </div>
             <div class="col-sm-8">
-                <div class="page-header float-right">
-                    <div class="page-title ">
-                        <ol class="breadcrumb  text-right">
-                            <li class="active "><a href="" data-toggle="modal" data-target="#myModal" id="listView" class="btn btn-success">View List Orders</a></li>
-                        </ol>
-                    </div>
+                <div class="page-header float-right mr-5">
+                    <form action="" class="mt-3">
+                    	<select name="" id="listOrder">
+                    		<option value="2">appove order</option>
+                    		<option value="3">cancel order</option>
+                    		<option value="1"selected>list order</option>
+                    	</select>
+                    </form>
                 </div>
             </div>
         </div>
-
 
 <div class="col-sm-12" >
 	<div class="container-fluid category">
@@ -44,6 +45,7 @@
                 <tr>
                     <th>#</th>
                     <th>User</th>
+                    <th>Email</th>
                     <th>Product</th>
                     <th>Quantity</th>
                     <th>Prices</th>
@@ -53,10 +55,10 @@
             </thead>
             <tbody>
             	@foreach($order as $value)
-
             		<tr>
             			<td>{{$value->id}}</td>
             			<td>{{$value->name}}</td>
+            			<td>{{$value->email}}</td>
             			<td >
             				@foreach($value->products as $vl)
             					<p class="{{$value->id}}product" data-id="{{$vl->id}}">{{$vl->name}}</p>
@@ -89,8 +91,6 @@
             			<td>
             				<button class="btn-info yes" data-id="{{$value->id}}">yes</button>
             				<button class="btn-danger no" data-id="{{$value->id}}">no</button>
-            				<!-- <a href="" class="btn btn-info yes" data-id="{{$value->id}}">yes</a> -->
-							<!-- <a href="" class="btn btn-danger no" data-id="{{$value->id}}">no</a> -->
             			</td>
             		</tr>
             	@endforeach
@@ -124,6 +124,7 @@
 						<tr>
 							<th>#</th>
 		                    <th>User</th>
+		                    <th>Email</th>
 		                    <th>Product</th>
 		                    <th>Quantity</th>
 		                    <th>Prices</th>
@@ -132,10 +133,10 @@
 					</thead>
 					<tbody id="approve">
 						@foreach($list as $value)
-
 		            		<tr>
 		            			<td>{{$value->id}}</td>
 		            			<td>{{$value->name}}</td>
+		            			<td>{{$value->email}}</td>
 		            			<td >
 		            				@foreach($value->products as $vl)
 		            					<p class="{{$value->id}}product" data-id="{{$vl->id}}">{{$vl->name}}</p>

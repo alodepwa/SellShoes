@@ -73,7 +73,6 @@
 	</div>
 </div>
 
-  
 <div class="modal fade" id="myModal">
 	<div class="modal-dialog" role="document">
 		<div class="modal-content">
@@ -88,10 +87,8 @@
 							</div>
 						</div>
 				</div>
-				
 			</div>
 			<div class="modal-body">
-
 				<form method="post" action="{{route('category.store')}}">
 					@csrf
 					<fieldset class="form-group">
@@ -147,6 +144,5 @@
 	</div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
 </div>
-
 
 @endsection

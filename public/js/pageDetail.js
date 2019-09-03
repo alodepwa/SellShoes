@@ -64,4 +64,22 @@ $(document).ready(function(){
 				$('.mess').html('! Bạn cần chọn size trước khi mua hàng');
 			}
 	});
+
+
+	// xử lý radio disable khi hết hàng
+	$('.hethang').each(function(){
+		var hethang;
+		$(this).find('.hethang1').each(function(){
+			if($(this).text()=="Hết hàng"){
+				hethang = $(this).attr('data-id');
+				$(this).attr('class','ml-3 text-danger');
+			};
+		});
+		$(this).find('input:radio').each(function(){
+			if($(this).val()==hethang){
+				$(this).attr('disabled','disabled');
+			}
+		});
+		
+	});
 });

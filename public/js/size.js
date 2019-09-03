@@ -94,7 +94,6 @@ $(document).ready(function(){
 						console.log(data);
 						if(data != undefined && data.errors !=undefined){
 							$.each(data['errors'],function(key, value){
-								console.log(value)
 								$('.notificationE').show();
 								$('.notificationS').hide();
 								$('.messE').append(value);

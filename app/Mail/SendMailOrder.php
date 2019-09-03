@@ -10,18 +10,17 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 class SendMailOrder extends Mailable
 {
     use Queueable, SerializesModels;
-    public $user;
-    public $product;
+    public $message;
+    public $order;
     public $path;
     /**
      * Create a new message instance.
      *
      * @return void
      */
-    public function __construct($user,$product,$path)
+    public function __construct($detail,$path)
     {
-        $this->user=$user;
-        $this->product=$product;
+        $this->order=$detail;
         $this->path=$path;
     }
 
@@ -32,6 +31,6 @@ class SendMailOrder extends Mailable
      */
     public function build()
     {
-        return $this->view('email.order1');
+        return $this->view('email.cancelOrder');
     }
 }

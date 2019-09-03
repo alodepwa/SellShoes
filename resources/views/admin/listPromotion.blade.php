@@ -46,23 +46,35 @@
                     <th >#</th>
                     <th >Name</th>
                     <th >Product</th>
+                    <th >Unit</th>
+                    <th >Start</th>
+                    <th >End</th>
                     <th >Action</th>
                 </tr>
             </thead>
             <tbody >
                 @foreach($promotion as $value)
 					<tr>
-						<td width="10%">{{$value->id}}</td>
-						<td width="35%">
+						<td width="">{{$value->id}}</td>
+						<td width="">
 							<a href="" class="hover" promotionId="{{$value->id}}">
 							{{$value['name']}}
 						</a>
 						</td>
-						<td width="35%"><a href="" class="hover" promotionId="{{$value->id}}">
+						<td width=""><a href="" class="hover" promotionId="{{$value->id}}">
 							{{$value->product->name}}
 						</a>
 						</td>
-						<td width="20%">
+						<td>
+							{{$value['unit']}} %
+						</td>
+						<td>
+							{{$value['start']}}
+						</td>
+						<td>
+							{{$value['end']}}
+						</td>
+						<td width="">
 							<a class="btn btn-danger delete_Cate" data-id="{{$value->id}}">Delete</a>
 							 <a href=""  data-id="{{$value->id}}" data-target="#myModal2" data-toggle="modal" class="btn btn-info rounded-pill edit_Cate">Edit</a>
 						</td>

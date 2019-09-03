@@ -95,41 +95,67 @@ $(document).ready(function(){
 
 
 	//filter prices
-	$('#sliderRange').slider({
-		range:true,
-		min:100000,
-		max:1000000,
-		values:[100000,1000000],
-		slide:function(event,ui){
-			$('#amountStart').val(ui.values[0]);
-			$('#amountEnd').val(ui.values[1]);
-			$('#amount').text('đ'+$('#sliderRange').slider('values',0)+"- đ"+$('#sliderRange').slider('values',1));
-			var min = ui.values[0];
-			var max = ui.values[1];
-			// setTimeout(function(){
-				console.log(min);
-
-				// load_product($('#amountStart').val(), $('#amountEnd').val());
-				load_product(min,max);
-			// },3000);
+	// $('#sliderRange').slider({
+	// 	range:true,
+	// 	min:100000,
+	// 	max:1000000,
+	// 	values:[100000,1000000],
+	// 	slide:function(event,ui){
+	// 		$('#amountStart').val(ui.values[0]);
+	// 		$('#amountEnd').val(ui.values[1]);
+	// 		$('#amount').text('đ'+$('#sliderRange').slider('values',0)+"- đ"+$('#sliderRange').slider('values',1));
+	// 		var min = ui.values[0];
+	// 		var max = ui.values[1];
 			
-		}
+	// 		setTimeout(function(){
+	// 			// load_product($('#amountStart').val(), $('#amountEnd').val());	
+	// 			load_product(min,max);
+	// 		},3000);
+			
+	// 	}
 
-	});
+		
+	// });
 
-	$('#amount').text('đ'+$('#sliderRange').slider('values',0)+"- đ"+$('#sliderRange').slider('values',1));
+	// $('#amount').text('đ'+$('#sliderRange').slider('values',0)+"- đ"+$('#sliderRange').slider('values',1));
 
-	function load_product(min,max){
-			$.ajax({
+	// function load_product(min,max){
+	// 		$.ajax({
+	// 		url:'/user/filterPrice',
+	// 		type:'post',
+	// 		dataType:'json',
+	// 		data:{
+	// 			min:min,
+	// 			max:max
+	// 		},
+	// 		success:function(data){
+	// 			console.log(data);
+	// 			setTimeout(function(){
+	// 				$('#showProduct').html(data);
+	// 			},500);
+	// 		},
+	// 		error:function(jqXHR){
+	// 			if(jqXHR.status==400){
+	// 				$('#showProduct').html('Không tìm thấy sản phẩm trong tầm giá đó');
+	// 			}
+	// 		},
+	// 	});
+		
+	// }
+
+
+	// search price
+
+	$(document).on('change','#searchPrice',function(){
+		var value = $('#searchPrice option:selected').val();
+		$.ajax({
 			url:'/user/filterPrice',
 			type:'post',
 			dataType:'json',
 			data:{
-				min:min,
-				max:max
+				'value':value
 			},
 			success:function(data){
-				console.log(data);
 				setTimeout(function(){
 					$('#showProduct').html(data);
 				},500);
@@ -138,9 +164,8 @@ $(document).ready(function(){
 				if(jqXHR.status==400){
 					$('#showProduct').html('Không tìm thấy sản phẩm trong tầm giá đó');
 				}
-			}
+			},
 		});
-		
-	}
+	})
 
 });
