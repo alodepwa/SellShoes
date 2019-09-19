@@ -29,7 +29,7 @@ class ProductController extends Controller
         return response()->json($out);
     }
 
-    // search product with name product or status or price(admin)
+    // search product with name product price(admin)
     public function SearchProduct(Request $request){
         $value = $request->get('value');
         if(!empty($value)){
@@ -132,7 +132,7 @@ class ProductController extends Controller
                 foreach ($size_id as $key => $value) {
                    $size[$value]=['quantity'=>$quantity];
                 }
-                    $info->sizes()->sync($size);
+                $info->sizes()->sync($size);
                 $result=['dataSuccess'=>'Update Quantity Success!'];
             }else{
                  $result=['dataSuccess'=>'Update Quantity False!'];
@@ -195,13 +195,13 @@ class ProductController extends Controller
             'size_id'=>'required',
             'category_id'=>'required'
         ],[
-            'name.required'=>'Tên sản phẩm không được để trống!',
-            'quantity.required'=>'Số lượng sản phẩm không được để trống!',
-            'price.numeric'=>'Giá sản phẩm cần nhập là số!',
-            'price.required'=>'Giá sản phẩm không được để trống!',
-            'description.required'=>'Mô tả sản phẩm không được để trống!',
+            'name.required'=>'1.Tên sản phẩm không được để trống!',
+            'quantity.required'=>'2.Số lượng sản phẩm không được để trống!',
+            'price.numeric'=>'3.Giá sản phẩm cần nhập là số!',
+            'price.required'=>'3.Giá sản phẩm không được để trống!',
+            'description.required'=>'4.Mô tả sản phẩm không được để trống!',
             'brand_id.required'=>'Brand không được để trống!',
-            'size_id.required'=>'Size sản phẩm không được để trống!',
+            'size_id.required'=>'5.Size sản phẩm không được để trống!',
             'category_id.required'=>'Category sản phẩm không được để trống!',
         ]);
 
@@ -213,10 +213,11 @@ class ProductController extends Controller
                 foreach ($size_id as $key => $value) {
                     $size[$value]= ['quantity'=>$quantity];
                 }
+                // $data['name']=htmlspecialchars($request->get('name'));
                 Product::create($data)->sizes()->sync($size); 
                 $result = ['dataSuccess'=>'Create Product Success!!!'];
             }else{
-                $result = ['dataSuccess'=>'Product Already Exists!!!'];
+                $result = ['dataFail'=>'Product Already Exists!!!'];
             }
             return Response()->json($result);
         }
@@ -264,13 +265,13 @@ class ProductController extends Controller
             'category_id'=>'required'
         ],
         [
-            'name.required'=>'Tên sản phẩm không được để trống!',
-            'quantity.required'=>'Số lượng sản phẩm không được để trống!',
-            'price.numeric'=>'Giá sản phẩm cần nhập là số!',
-            'price.required'=>'Giá sản phẩm không được để trống!',
-            'description.required'=>'Mô tả sản phẩm không được để trống!',
+            'name.required'=>'1.Tên sản phẩm không được để trống!',
+            'quantity.required'=>'2.Số lượng sản phẩm không được để trống!',
+            'price.numeric'=>'3.Giá sản phẩm cần nhập là số!',
+            'price.required'=>'3.Giá sản phẩm không được để trống!',
+            'description.required'=>'4.Mô tả sản phẩm không được để trống!',
             'brand_id.required'=>'Brand không được để trống!',
-            'size_id.required'=>'Size sản phẩm không được để trống!',
+            'size_id.required'=>'5.Size sản phẩm không được để trống!',
             'category_id.required'=>'Category sản phẩm không được để trống!',
         ]);
 
@@ -288,7 +289,7 @@ class ProductController extends Controller
                 $product->sizes()->sync($size);
                 $result=["message"=>'Update Success!!!'];
             }else{
-                $result=["message"=>'Update False!!!'];
+                $result=["messageFail"=>'Update False!!!'];
             }
             return Response()->json($result);
         }

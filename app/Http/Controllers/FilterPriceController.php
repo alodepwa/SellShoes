@@ -9,22 +9,32 @@ class FilterPriceController extends Controller
     // filter prices home user 
     public function filterPrice(Request $request){
         $value = $request->get('value');
+        $productName = $request->get('product');
         if($value==1){
+          if(empty($productName)){
             $product = Product::orderBy('price','asc')->paginate(12);
+          }else{
+            $product = Product::where('name','like','%'.$productName.'%')->orderBy('price','asc')->paginate(12);
+          }
         }
         else if($value==2){
-             $product = Product::orderBy('price','desc')->paginate(12);
+          if(empty($productName)){
+            $product = Product::orderBy('price','desc')->paginate(12);
+          }else{
+            $product = Product::where('name','like','%'.$productName.'%')->orderBy('price','desc')->paginate(12);
+          }
+             
         }
         $count = count($product);
 
-        $out="";
+        $out='';
         if($count>=1){
             foreach ($product as $key => $value) {
-                $end =  $value->promotion->end;
-                $start =  $value->promotion->start;
+                $end =  isset($value->promotion->end)?$value->promotion->end:0;
+                $start =  isset($value->promotion->start)?$value->promotion->start:0;
                 $today = date('Y-m-d');
                 foreach ($value->images as $key => $val) {
-                   $img = $val->path;
+                   $imgs = $val->path;
                    break;
                 }
                 $total=0;
@@ -33,6 +43,7 @@ class FilterPriceController extends Controller
                     $total+=$val->pivot->quantity;
                   }
                 }
+                $img = isset($imgs)? $imgs:'1563271041_gym.jpg';
                 if(strtotime($today) >= strtotime($start) && strtotime($end)>=strtotime($today)){
                     $quantity = $value->price-($value->price* $value->promotion->unit/100);
                     $out.='

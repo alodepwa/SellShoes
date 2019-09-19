@@ -16,11 +16,29 @@
  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
     <script>window.jQuery || document.write('<script src="assets/js/vendor/jquery.min.js"><\/script>')</script>
 <link rel="stylesheet" href="/css/rate.css">
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
   .bottom img{
-    width: 160px;
-    height: 160px;
-    }}
+    width: 120px;
+    height: 120px;
+    }
+
+  .promotions a:hover{
+    text-decoration: none;
+  }
+  .promotions{
+    height: 300px;
+    width: 240px;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+  ::-webkit-scrollbar{
+      width: 0px;
+  }
+  ::-webkit-scrollbar{
+      width: 0px;
+  }
 </style>
 @endsection
 
@@ -38,11 +56,11 @@
     <div class="site-section">
       <div class="container">
         <div class="row">
-		<div class="col-sm-6 details">
-					<div class="row imgTop">
-						<div class="container imgBox">
+		      <div class="col-sm-5 details">
+					  <div class="row imgTop">
+						  <div class="container imgBox">
 								@foreach($product->images as $val)
-									<img src='{{asset("/upImage/$val->path")}}' alt="Image" class="img-fluid">
+									<img src='{{asset("/upImage/$val->path")}}' style="width: 350px; height: 330px;" alt="Image" class="img-fluid">
 									@break
 								@endforeach
 						</div>
@@ -59,9 +77,10 @@
 			</div>
 
 
-          <div class="col-md-6">
+          <div class="col-md-7">
+            <div class="col-sm-6">
             <h2 class="text-black nameProduct">{{$product['name']}}</h2>
-            <div class="my-4">
+            <div class="my-3">
               <?php
                   $sold=0;
                   foreach ($product->orders as $key => $value) {
@@ -155,13 +174,13 @@
             <p>{{$product->description}}</p>
             <p class="text-danger"><strong class="text-primary h4 text-danger" id="price">
               <?php 
-                $end =  $product->promotion->end;
-                $start =  $product->promotion->start;
+                $end =  isset($product->promotion->end)?$product->promotion->end:0;
+                $start =  isset($product->promotion->start)?$product->promotion->start:0;
                 $today = date('Y-m-d');
                 if(strtotime($today) >= strtotime($start) && strtotime($end)>=strtotime($today)){
                   echo number_format($product->price-($product->price*$product->promotion->unit/100)); 
                 }
-                if(strtotime($today)< strtotime($start)  || strtotime($end)< strtotime($today)){
+                if(strtotime($today)< strtotime($start)  || strtotime($end)< strtotime($today) || $end ==0 || $start==0){
                   echo number_format($product->price); 
                 }
               ?>
@@ -211,6 +230,52 @@
             <p><a href="" id="addToCart" class="btn btn-success">Add To Cart</a></p>
 
           </div>
+          
+          <div class="col-sm-6">
+            <div class="p-4 rounded mb-4 promotion border">
+              <div class="mb-4">
+                <h3 class="mb-3 text-center h6 text-uppercase text-danger d-block pb-4" style="font-weight: 700;
+                font-size: 18px;">Sản Phẩm Khuyến Mãi</h3>
+               </div>
+               <div class="promotions">
+                 
+                @foreach($promotions as $value)
+                 <?php 
+                    $end =  isset($value->promotion->end)?$value->promotion->end:0;
+                    $start =  isset($value->promotion->start)?$value->promotion->start:0;;
+                    $today = date('Y-m-d');
+                 ?>
+                  @if(strtotime($today) >= strtotime($start) && strtotime($end)>=strtotime($today))
+                  <div class="row ">
+                    <div class="col-md-12">
+                      <div class="row d-flex flex-row ml-2 mr-2 mt-2  border-top ">
+                        <figure class="block-3-image">
+                          @foreach($value->images as $val)
+                            <a href='{{route("showDetail",$value->id)}}'><img src='{{asset("/upImage/$val->path")}}' style="width: 80px; height: 80px;" alt="Image placeholder" class="img-fluid"></a>
+                            @break
+                           @endforeach
+                        </figure>
+                        <div class="pl-3" style="margin-top: -20px;">
+                          <h3><a href='{{route("showDetail",$value->id)}}' class="text-dark">{{$value->name}}</a></h3>
+                            @if($value->promotion)
+                                <p class="text-primary font-weight-bold text-left text-danger mt-3"><?php echo number_format($value->price-($value->price*$value->promotion->unit/100)) ?> <u>đ</u></p>
+                                <p class="text-left" style="font-weight: bold;"><strike>đ <?php echo number_format($value->price) ?> </strike>&nbsp;&nbsp;-{{$value->promotion->unit}}%</p>
+                            @endif
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                @endif
+              @endforeach
+            </div>
+            </div>
+          </div>
+
+        </div>
+
+
+        </div>
+
         </div>
       </div>
     </div>
@@ -547,24 +612,22 @@
       <div class="container">
         <div class="row justify-content-center">
           <div class="col-md-7 site-section-heading text-center pt-4">
-            <h2>Featured Products</h2>
+            <h2>Sản Phẩm Tương Tự</h2>
           </div>
         </div>
-        <div class="row">
-
+        <div class="row featured">
           <div class="col-md-12">
-            <div class="nonloop-block-3 owl-carousel">
+            <div class="nonloop-block-3 owl-carousel" >
                 @foreach($categoryAll as $value)
-                
-                  <div class="block-4 text-center bottom">
-                    <figure class="block-4-image">
+                  <div class="block-3 text-center bottom" >
+                    <figure class="block-3-image">
                       @foreach($value->images as $val)
                         <a href='{{route("showDetail",$value->id)}}'><img src='{{asset("/upImage/$val->path")}}' alt="Image placeholder" class="img-fluid"></a>
                         @break
                        @endforeach
                     </figure>
                     <div class="block-4-text px-2">
-                      <h3><a href='{{route("showDetail",$value->id)}}' class="text-dark">{{$value->name}}</a></h3>
+                      <h3 class="text-left"><a href='{{route("showDetail",$value->id)}}' class="text-dark">{{$value->name}}</a></h3>
                       @if(!$value->promotion)
                         <p class="text-primary font-weight-bold text-left text-danger mt-2"><?php echo number_format($value->price) ?> <u>đ</u></p>
                       @endif
@@ -672,20 +735,19 @@
                                 </div>';
                               }
                        ?>
-                        
-              @endforeach
-            </div>
-          </div>
-
+                 </div>
+              </div>       
+            @endforeach
         </div>
       </div>
     </div>
+  </div>
+</div>
 
     <script>
 		$(document).ready(function(){
 			$('.imgBottom a').click(function(e){
 				e.preventDefault();
-				console.log('alo');
 				$('.imgBox img').attr("src",$(this).attr("href"));
 			});
 		});

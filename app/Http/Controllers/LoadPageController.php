@@ -18,14 +18,18 @@ class LoadPageController extends Controller
     public function order(Request $request){
         $validator = Validator::make($request->all(),[
             'name'=>'required',
-            'tel'=>'numeric|required',
+            'tel'=>'numeric|required|min:8|max:10',
             'email'=>'email|required',
             'address'=>'required'
         ],[
-            'name.required'=>'Name không được để trống',
-            'tel.required'=>'Tel không được để trống',
-            'email.required'=>'Email không được để trống',
-            'address.required'=>'Address không được để trống',
+            'name.required'=>'1.Name không được để trống',
+            'tel.required'=>'2.Tel không được để trống',
+            'tel.numeric'=>'2.Tel cần nhập là số',
+            'tel.min'=>'2.Tel ít nhất 8 số',
+            'tel.max'=>'2.Tel ít hơn 10 số',
+            'email.required'=>'3.Email không được để trống',
+            'email.email'=>'3.Email không hợp lý',
+            'address.required'=>'4.Address không được để trống',
         ]);
         if($validator->fails()){
             return response()->json(['errors'=>$validator->errors()->all()]);
@@ -93,10 +97,15 @@ class LoadPageController extends Controller
         $quantity = explode(';',$request->get('quantity'));
         $price = explode(';',trim($request->get('size')));
         $nameProduct = explode(';',trim($request->get('nameProduct')));
-        $total =$request->get('total');
+        // $total =$request->get('total');
         $size = explode(';', $request->get('sizeAll'));
         $productID = explode(';', $request->get('productID'));
         $user = \Auth::user();
+        $total=0;
+        for($i = 0; $i < count($productID)-1;$i++){
+          $pricePro= $this->promotionDetail($productID[$i]);
+          $total+=$pricePro*$quantity[$i];
+        }
         return view('user.checkout',compact('quantity','price','nameProduct','total','productID','size','user'));
     }
 
@@ -165,13 +174,13 @@ class LoadPageController extends Controller
 
     public function promotionDetail($id){
         $product = Product::findOrFail($id);
-        $end =  $product->promotion->end;
-        $start =  $product->promotion->start;
+        $end =  isset($product->promotion->end)?$product->promotion->end:0;
+        $start =  isset($product->promotion->start)?$product->promotion->start:0;
         $today = date('Y-m-d');
         if(strtotime($today) >= strtotime($start) && strtotime($end)>=strtotime($today)){
             $quantity = $product->price-($product->price* $product->promotion->unit/100);
         }
-        if(strtotime($today)< strtotime($start)  || strtotime($end)< strtotime($today)){
+        if(strtotime($today)< strtotime($start)  || strtotime($end)< strtotime($today) ||$end=0 || $start==0){
             $quantity = Product::findOrFail($id)->price;
         }
         return $quantity;
@@ -182,15 +191,16 @@ class LoadPageController extends Controller
         $data = $request->get('quantity');
         $id = $request->get('id');
         $product = Product::findOrFail($id);
-        $end =  $product->promotion->end;
-        $start =  $product->promotion->start;
+        $end =  isset($product->promotion->end)?$product->promotion->end:0;
+        $start =  isset($product->promotion->start)?$product->promotion->start:0;
         $today = date('Y-m-d');
         if(strtotime($today) >= strtotime($start) && strtotime($end)>=strtotime($today)){
             $quantity = $product->price-($product->price* $product->promotion->unit/100);
         }
-        if(strtotime($today)< strtotime($start)  || strtotime($end)< strtotime($today)){
+        if(strtotime($today)< strtotime($start)  || strtotime($end)< strtotime($today) || $start ==0 || $end ==0){
             $quantity = Product::findOrFail($id)->price;
         }
+        // $number = str_replace(",",".",$quantity*$data);
         $out = number_format($quantity*$data);
         return response()->json($out);
     }
@@ -201,20 +211,29 @@ class LoadPageController extends Controller
     // search all product with name product and prices
     public function search(Request $request){
         $data = $request->get('value');
+        $sortPrice = $request->get('price');
         if(!empty($data)){
-            $product = Product::where('name','like','%'.$data.'%')->orWhere('price','like','%'.$data.'%')->get();
+          if($request->get('price')==1){
+            $product = Product::where('name','like','%'.$data.'%')->orderBy('price','asc')->paginate(12);
+          }
+          else if($request->get('price')==2){
+            $product = Product::where('name','like','%'.$data.'%')->orderBy('price','desc')->paginate(12);
+          }else{
+            $product = Product::where('name','like','%'.$data.'%')->paginate(12);
+          }
         }else{
             $product =Product::paginate(12);
         }
         $count = count($product);
-        $out="";
+        $out='';
         if($count>=1){
             foreach ($product as $key => $value) {
-                $end =  $value->promotion->end;
-                $start =  $value->promotion->start;
+                $end =  isset($value->promotion->end)?$value->promotion->end:0;
+                $start =  isset($value->promotion->start)?$value->promotion->start:0;
                 $today = date('Y-m-d');
                 foreach ($value->images as $key => $val) {
-                   $img = $val->path;
+                   // $img = $val->path;
+                  $imgs =$val->path;
                    break;
                 }
                 $total=0;
@@ -223,6 +242,7 @@ class LoadPageController extends Controller
                     $total+=$val->pivot->quantity;
                   }
                 }
+                 $img = isset($imgs)? $imgs:'1563271041_gym.jpg';
                 if(strtotime($today) >= strtotime($start) && strtotime($end)>=strtotime($today)){
                     $quantity = $value->price-($value->price* $value->promotion->unit/100);
                     $out.='
@@ -324,7 +344,7 @@ class LoadPageController extends Controller
                             </div>';
 
                 }
-                if(strtotime($today)< strtotime($start)  || strtotime($end)< strtotime($today)){
+                if(strtotime($today)< strtotime($start)  || strtotime($end)< strtotime($today) || $end ==0 || $start ==0){
                     $out.='
                         <div class="col-sm-6 col-lg-4 mb-4" data-aos="fade-up">
                         <div class="block-4 text-center border">
@@ -423,7 +443,9 @@ class LoadPageController extends Controller
                               </div>
                             </div>';
                 }
+                
             }
+                       
         }else{
             $out = "không tìm thấy sản phẩm";
              
@@ -433,17 +455,23 @@ class LoadPageController extends Controller
 
 
     // search category
-    public function searchCategory($id){
-        $products = Product::where('category_id','=',$id)->get();
-        $count = count($products);
-        $out="";
+    public function searchCategory(Request $request){
+        if($request->get('price')==1){
+           $product = Product::where('category_id','=',$request->get('id'))->orderBy('price','asc')->paginate(12);
+        }else if($request->get('price')==2){
+          $product = Product::where('category_id','=',$request->get('id'))->orderBy('price','desc')->paginate(12);
+        }else if(empty($request->get('price'))){
+           $product = Product::where('category_id','=',$request->get('id'))->paginate(12);
+        }
+        $count = count($product);
+        $out='';
         if($count>=1){
-            foreach ($products as $key => $value) {
-                $end =  $value->promotion->end;
-                $start =  $value->promotion->start;
+            foreach ($product as $key => $value) {
+                $end =  isset($value->promotion->end)?$value->promotion->end:0;
+                $start =  isset($value->promotion->start)?$value->promotion->start:0;
                 $today = date('Y-m-d');
                 foreach ($value->images as $key => $val) {
-                   $img = $val->path;
+                   $imgs = $val->path;
                    break;
                 }
                 $total=0;
@@ -452,6 +480,7 @@ class LoadPageController extends Controller
                     $total+=$val->pivot->quantity;
                   }
                 }
+                $img = isset($imgs)? $imgs:'1563271041_gym.jpg';
                 if(strtotime($today) >= strtotime($start) && strtotime($end)>=strtotime($today)){
                     $quantity = $value->price-($value->price* $value->promotion->unit/100);
                     $out.='
@@ -552,7 +581,7 @@ class LoadPageController extends Controller
                             </div>';
 
                 }
-                if(strtotime($today)< strtotime($start)  || strtotime($end)< strtotime($today)){
+                if(strtotime($today)< strtotime($start)  || strtotime($end)< strtotime($today) || $start ==0 || $end==0){
                     $out.='
                         <div class="col-sm-6 col-lg-4 mb-4" data-aos="fade-up">
                         <div class="block-4 text-center border">
@@ -655,12 +684,13 @@ class LoadPageController extends Controller
         }else{
             $out.='<p>Sản phẩm này không được tìm thấy!</p>';
         }
-        return response()->json($out);
+        return response()->json(['out'=>$out,'product'=>$product]);
     }
 
 
     // start seach with search size
     public function searchSize($id){
+
         $size=Size::findOrFail($id);
         foreach ($size->products as $key => $value) {
             $productID[]=$value->pivot->product_id;
@@ -894,7 +924,7 @@ class LoadPageController extends Controller
     public function view($id){
         $product=Product::find($id);
         $category=$product->category_id;
-        $categoryAll = Product::where('category_id','like',$category)->get();
+        $categoryAll = Product::where('category_id','=',$category)->get();
         return view('user.view',compact('product','categoryAll'));
     }
 
@@ -902,11 +932,20 @@ class LoadPageController extends Controller
     // start show detail product
     public function showDetail($id){
         $product=Product::find($id);
-        $comment = Comment::where('product_id','=',$id)->orderBy('id','asc')->paginate(4);
+        $comment = Comment::where('product_id','=',$id)->orderBy('id','desc')->paginate(4);
         $comments=Comment::where('product_id','=',$id)->get();
         $category=$product->category_id;
         $categoryAll = Product::where('category_id','=',$category)->get();
-        return view('user.detailProduct',compact('product','categoryAll','comment','comments'));
+
+        // sản phẩm bán chạy
+         $promotion = Product::join('promotions','products.id','=','promotions.product_id')->get('product_id');
+
+        // danh sách khuyến mãi
+        foreach ($promotion as $key => $value) {
+          $idProduct[]=$value->product_id;
+        }
+        $promotions = Product::findOrFail($idProduct);
+        return view('user.detailProduct',compact('product','categoryAll','comment','comments','promotions'));
     }
     /**
      * Display a listing of the resource.
@@ -918,7 +957,16 @@ class LoadPageController extends Controller
         $product =Product::paginate(12);
         $category = Category::all();
         $size = Size::all();
-        return view('user.home',compact('category','size','product'));
+        $date = date('Y-m-d');
+        $promotion = Product::join('promotions','products.id','=','promotions.product_id')->get('product_id');
+
+        // danh sách khuyến mãi
+        foreach ($promotion as $key => $value) {
+          $id[]=$value->product_id;
+        }
+        $promotions = Product::findOrFail($id);
+        $products = Product::all();
+        return view('user.home',compact('category','size','product','products','promotions'));
     }
 
     /**

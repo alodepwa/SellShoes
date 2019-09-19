@@ -8,12 +8,13 @@ $(document).ready(function(){
 		}
 	});
 
+
+
 	// start delete
 	$(document).on('click', '.deleteComment', function(e){
 		e.preventDefault();
 		console.log('alo');
 		var curent =$(this);
-		console.log(curent);
 		if(confirm("Bạn có muốn xóa?")){
 			var id=curent.attr("data-id");
 			$.ajax({
@@ -63,37 +64,37 @@ $(document).ready(function(){
 	});
 
 	// start approve comments
-	$(document).on('click','.agree',function(){
-		var id = $(this).attr("data-id");
-		$.ajax({
-			url:'/admin/comments/'+id,
-			type:'PUT',
-			dataType:'json',
-			data:{},
-			success:function(data){
-				alert(data);
-				$("#table_Cate").load(" #table_Cate");
-				$("#pageAdd").load(" #pageAdd");
-			}
-		});
-	});
+	// $(document).on('click','.agree',function(){
+	// 	var id = $(this).attr("data-id");
+	// 	$.ajax({
+	// 		url:'/admin/comments/'+id,
+	// 		type:'PUT',
+	// 		dataType:'json',
+	// 		data:{},
+	// 		success:function(data){
+	// 			alert(data);
+	// 			$("#table_Cate").load(" #table_Cate");
+	// 			$("#pageAdd").load(" #pageAdd");
+	// 		}
+	// 	});
+	// });
 
 
 	// start cancel
-	$(document).on('click','.cancel',function(){
-		var id = $(this).attr("data-id");
-		$.ajax({
-				url:'/admin/comments/'+id,
-				type: 'DELETE',
-				dataType:'json',
-				data:{},
-				success:function(data){
-				},
-				error:function(error){
-					alert("ERROR!!!");
-				}
-			});
-	});
+	// $(document).on('click','.cancel',function(){
+	// 	var id = $(this).attr("data-id");
+	// 	$.ajax({
+	// 			url:'/admin/comments/'+id,
+	// 			type: 'DELETE',
+	// 			dataType:'json',
+	// 			data:{},
+	// 			success:function(data){
+	// 			},
+	// 			error:function(error){
+	// 				alert("ERROR!!!");
+	// 			}
+	// 		});
+	// });
 
 });
 

@@ -28,9 +28,14 @@
 		.chitiet{
 			margin: 20px;
 		}
+		h2{
+			color: red;
+			font-weight: bold;
+		}
 	</style>
 </head>
 <body>
+	<h2>THÔNG BÁO ĐẶT HÀNG THÀNH CÔNG</h2>
 	<div>
 		{{$user}} thân mến!
 	</div>

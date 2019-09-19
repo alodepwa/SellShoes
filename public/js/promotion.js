@@ -8,15 +8,20 @@ $(document).ready(function(){
 		}
 	});
 
-	$('.notification').hide();
+	$('.notificationS').hide();
+	$('.notificationF').hide();
 
 	// start add promotion
 	$('#save').click(function(e){
 		e.preventDefault();
 		$('.mess').html('');
 		// $('.notification').show();
+		$('.1').html('');
+		$('.2').html('');
+		$('.3').html('');
+		$('.4').html('');
 		var unit = $('#addPromotion input[name="unit"]').val();
-		if(unit <=100 && unit >= 0){
+		
 			$.ajax({
 				url:'/admin/promotion',
 				type:"POST",
@@ -32,24 +37,36 @@ $(document).ready(function(){
 					console.log(data);
 					if(data != undefined && data.errors != undefined){
 						$.each(data.errors,function(key,value){
-							$('.notification').show();
-							$('.mess').append(value+'<br>');
+							switch(value.charAt(0)){
+								case '1':$('.1').text(value.slice(2));
+									break;
+								case '2':$('.2').text(value.slice(2));
+										break;
+								case '3':$('.3').text(value.slice(2));
+										break;
+								case '4':$('.4').text(value.slice(2));
+										break;
+							}
+							
 						});
 					}else{
-						$('.notification').hide();
-						alert(data['dataSuccess']);
+						if(data['dataSuccess']!=null){
+							$('.notificationS').show();
+							$('.mess').html(data['dataSuccess']);
+							$('.notificationF').hide();
+						}else{
+							$('.notificationF').show();
+							$('.messF').html(data['dataFail']);
+							$('.notificationS').hide();
+						}
 						$("#table_Cate").load(' #table_Cate');
-				$("#pageAdd").load(" #pageAdd");
+						$("#pageAdd").load(" #pageAdd");
 					}
 				},
 				error:function(error){
 					$('.mess').html("ERROR!!!");
 				}
 			});
-		}else{
-			$('.notification').show();
-			$('.mess').append('Unit cần bé hơn 100');
-		}
 	});  
 	// end add
 
@@ -85,6 +102,8 @@ $(document).ready(function(){
 	});
 
 	// start update promotion
+	$('.notificationES').hide();
+	$('.notificationEF').hide();
 	$(document).on('click','.edit_Cate', function(){
 
 		var id = $(this).attr("data-id");
@@ -104,11 +123,11 @@ $(document).ready(function(){
 			}
 		});
 
-
-
-
-
 		$('#saveEditPromotion').on("click", function(){
+			$('.11').html('');
+			$('.22').html('');
+			$('.33').html('');
+			$('.44').html('');
 			$.ajax({
 				url:'/admin/promotion/'+id,
 				type:'PUT',
@@ -124,12 +143,29 @@ $(document).ready(function(){
 				success:function(data){
 					if(data !=undefined && data.errors !=undefined){
 						$.each(data.errors, function(key,value){
-							$('.notification').show();
-							$('.mess').append(value+'<br>');
+							switch(value.charAt(0)){
+								case '1':$('.11').text(value.slice(2));
+									break;
+								case '2':$('.22').text(value.slice(2));
+										break;
+								case '3':$('.33').text(value.slice(2));
+										break;
+								case '4':$('.44').text(value.slice(2));
+										break;
+							}
 						});
 					}
 					else{
-						alert(data['message']);
+						if(data['message']!=null){
+							$('.notificationES').show();
+							$('.messES').html(data['message']);
+							$('notificationEF').hide();
+							$('#saveEditPromotion').attr('disabled','disabled');
+						}else{
+							$('.notificationEF').show();
+							$('.messEF').html(data['messageFail']);
+							$('notificationES').hide();
+						}
 						$("#table_Cate").load(' #table_Cate');
 					}
 				}

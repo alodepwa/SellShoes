@@ -105,16 +105,16 @@
 			<div class="modal-header">
 				<div class="container">
 					<div class="row">
-						<div class="container "><h4 class="modal-title">Create Brand</h4></div>
+						<div class="container "><h4 class="modal-title">Create Product</h4></div>
 					</div>
 						<div class="row notificationS">
 							<div class="container-fluid">
 								<div class="alert alert-success messS"></div>
 							</div>
 						</div>
-						<div class="row notificationE">
+						<div class="row notificationF">
 							<div class="container-fluid">
-								<div class="alert alert-danger messE"></div>
+								<div class="alert alert-danger messF"></div>
 							</div>
 						</div>
 				</div>
@@ -128,10 +128,15 @@
 						<div class="row d-flex align-items-center">
 							<div class="col-6">
 								<label for="formGroupExampleInput">Product Name<small>*</small></label>
+								<br>
+								<label for="" class="1 text-danger"></label>
 								<input type="text" name="name" class="form-control" id="formGroupExampleInput" placeholder="Product Name...">
 							</div>
 							<div class="col-6">
+
 								<label for="formGroupExampleInput1">Status</label>
+								<br>
+								<label for=""></label>
 								<input type="text" name="status" class="form-control" id="formGroupExampleInput1" placeholder="Status...">
 							</div>
 						</div>
@@ -140,16 +145,22 @@
 						<div class="row">
 							<div class="col-sm-6">
 								<label for="formGroupExampleInput2">Price<small>*</small></label>
+								<br>
+								<label for="" class="3 text-danger"></label>
 								<input type="number" step="0.001" min="0" name="price" class="form-control" id="formGroupExampleInput2" placeholder="Price...">
 							</div>
 							<div class="col-sm-6">
 								<label for="formGroupExampleInput2">Quantity<small>*</small></label>
+								<br>
+								<label for="" class="2 text-danger"></label>
 								<input type="number" name="quantity" min="0" class="form-control" id="formGroupExampleInput2" placeholder="Quantity...">
 							</div>
 						</div>
 					</fieldset>
 					<fieldset class="form-group">
 						<label >Description<small>*</small></label>
+						<br>
+						<label for="" class="4 text-danger"></label>
 						<textarea name="description" id="descripton" class="form-control" placeholder="Description..."></textarea>
 					</fieldset>
 					<fieldset class="form-group">
@@ -175,6 +186,8 @@
 					</fieldset>
 					<fieldset class="form-group">
 						<label for="formGroupExampleInput5">Size ID<small>*</small></label>
+						<br>
+						<label for="" class="5 text-danger"></label>
 						<select name="size_id[]" class="form-control"  id="size" multiple>
 							@foreach($listSize as $value)
 								<option value="{{$value->id}}">{{$value->name}}</option>
@@ -204,9 +217,14 @@
 					<div class="row">
 						<div class="container "><h4 class="modal-title">Edit Product</h4></div>
 					</div>
-						<div class="row notification">
+						<div class="row notificationES">
 							<div class="container-fluid">
-								<div class="alert alert-danger mess"></div>
+								<div class="alert alert-success messES"></div>
+							</div>
+						</div>
+						<div class="row notificationEF">
+							<div class="container-fluid">
+								<div class="alert alert-danger messEF"></div>
 							</div>
 						</div>
 				</div>
@@ -219,10 +237,14 @@
 						<div class="row d-flex align-items-center">
 							<div class="col-6">
 								<label for="formGroupExampleInput">Product Name<small>*</small></label>
+								<br>
+								<label for="" class="text-danger 11"></label>
 								<input type="text" name="name" class="form-control" id="formGroupExampleInput" placeholder="Product Name...">
 							</div>
 							<div class="col-6">
 								<label for="formGroupExampleInput1">Status</label>
+								<br>
+								<label for=""></label>
 								<input type="text" name="status" class="form-control" id="formGroupExampleInput1" placeholder="Status...">
 							</div>
 						</div>
@@ -231,16 +253,22 @@
 						<div class="row">
 							<div class="col-sm-6">
 								<label for="formGroupExampleInput2">Price<small>*</small></label>
+								<br>
+								<label for="" class="text-danger 33"></label>
 								<input type="number" step="0.001" min="0" name="price" class="form-control" id="formGroupExampleInput2" placeholder="Price...">
 							</div>
 							<div class="col-sm-6">
 								<label for="formGroupExampleInput2">Quantity<small>*</small></label>
+								<br>
+								<label for="" class="text-danger 22"></label>
 								<input type="number" name="quantity" min="0" class="form-control" id="formGroupExampleInput2" placeholder="Quantity...">
 							</div>
 						</div>
 					</fieldset>
 					<fieldset class="form-group">
 						<label >Description<small>*</small></label>
+						<br>
+						<label for="" class="text-danger 44"></label>
 						<textarea name="description" id="descripton" class="form-control" placeholder="Description..."></textarea>
 					</fieldset>
 					<fieldset class="form-group">
@@ -265,6 +293,8 @@
 					</fieldset>
 					<fieldset class="form-group">
 						<label for="formGroupExampleInput5">Size ID<small>*</small></label>
+						<br>
+						<label for="" class="text-danger 55"></label>
 						<select name="size_id[]" class="form-control"  id="formGroupExampleInput5" multiple>
 							@foreach($listSize as $value)
 								<option value="{{$value->id}}">{{$value->name}}</option>
@@ -290,9 +320,9 @@
 					<div class="row">
 						<div class="container "><h4 class="modal-title">Update Quantity</h4></div>
 					</div>
-						<div class="row notification">
+						<div class="row notificationU">
 							<div class="container-fluid">
-								<div class="alert alert-danger mess"></div>
+								<div class="alert alert-success messU"></div>
 							</div>
 						</div>
 				</div>
@@ -301,12 +331,15 @@
 			<div class="modal-body">
 				<form id="formUpdateQuantity">
 					@csrf
+					<input type="hidden" name="idPro">
 					<fieldset class="form-group">
 						<label for="formGroupExampleInput">Product Name<small>*</small></label>
 						<input type="text" name="name" class="form-control" id="formGroupExampleInput" disabled placeholder="Product Name...">
 					</fieldset>
 					<fieldset class="form-group">
 						<label for="formGroupExampleInput2">Quantity<small>*</small></label>
+						<br>
+						<label for="" class="text-danger 111"></label>
 						<input type="number" name="quantity" min="0" class="form-control" id="formGroupExampleInput2" placeholder="Quantity...">
 					</fieldset>
 				</form>

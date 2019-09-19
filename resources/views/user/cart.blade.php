@@ -71,20 +71,20 @@
                       </td>
                       <td  class="{{$value->id}}price price">
                         <?php 
-                            $end =  $value->promotion->end;
-                            $start =  $value->promotion->start;
+                            $end =  isset($value->promotion->end)?$value->promotion->end:0;
+                            $start =  isset($value->promotion->start)?$value->promotion->start:0;
                             $today = date('Y-m-d');
                             if(strtotime($today) >= strtotime($start) && strtotime($end)>=strtotime($today)){
                                echo $price= number_format($value->price-($value->price* $value->promotion->unit/100));
                             }
-                            if(strtotime($today)< strtotime($start)  || strtotime($end)< strtotime($today)){
+                            if(strtotime($today)< strtotime($start)  || strtotime($end)< strtotime($today) || $end ==0 || $start == 0 ){
                                 echo $price = number_format($value->price);
                             }
                          ?>
                       </td>
 
                       <td width="13%">
-                        <div class="input-group mb-3" style="max-width: 120px;">
+                        <div class="input-group mb-3" style="max-width: 150px;">
                           <div class="input-group-prepend">
                             <button class="btn btn-outline-primary js-btn-minus " data-click="{{$value->id}}" data-size="{{$sizeCheck}}" type="button">&minus;</button>
                           </div>
@@ -94,7 +94,7 @@
                           </div>
                         </div>
                       </td>
-                      <td class="{{$value->id}}and{{$sizeCheck}}money total">{{$price}}</td>
+                      <td class="{{$value->id}}and{{$sizeCheck}}money total"><?php echo $price  ?></td>
                       <td><a href="#" class="btn btn-primary btn-sm delete"data-id="{{$dem}}">X</a></td>
                     </tr>
           				@endforeach
@@ -111,7 +111,7 @@
           <div class="col-md-6 pl-5">
             <div class="row justify-content-end">
               <div class="col-md-7">
-                <div class="row">
+                <!-- <div class="row">
                   <div class="col-md-12 text-right border-bottom mb-5">
                     <h3 class="text-black h4 text-uppercase">Cart Totals</h3>
                   </div>
@@ -123,12 +123,7 @@
                   <div class="col-md-6 text-right">
                     <strong class="text-black" id="total"></strong>
                   </div>
-                </div>
-              <?php 
-
-              
-
-               ?>
+                </div> -->
                 <div class="row">
                   <div class="col-md-12">
                     <form action="{{route('checkout')}}" method="post">

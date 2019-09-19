@@ -14,6 +14,7 @@ $(document).ready(function(){
 	$(document).on('keyup','#search',function(e){
 		e.preventDefault();
 		var value = $(this).val();
+		var price = $('#searchPrice option:selected').val();
 		var delay = 100;
 		if(value.length>3){
 			$.ajax({
@@ -21,12 +22,13 @@ $(document).ready(function(){
 			type:"post",
 			dataType:'json',
 			data:{
-				'value':value
+				'value':value,
+				'price':price
 			},
 			success:function(data){
 				setTimeout(function(){
 					$('#showProduct').html(data);
-					$('#pageAdd').html('');
+					$('#pageAdd').load(' #pageAdd');
 				},delay);
 				
 			},
@@ -48,7 +50,7 @@ $(document).ready(function(){
 				'value':''
 			},
 			success:function(data){
-				console.log(data);
+				// console.log(data);
 				$('#showProduct').html(data);
 				$('#pageAdd').load(' #pageAdd');
 			}
@@ -59,15 +61,21 @@ $(document).ready(function(){
 	// search category
 	$(document).on('click','.category',function(e){
 		e.preventDefault();
+		$('#search').val('');
+		var price =$('#searchPrice option:selected').val();
+		console.log(price);
 		var id = $(this).attr('data-id');
-		console.log(id);
 		$.ajax({
-			url:'/user/searchCategory/'+id,
-			type:'get',
+			url:'/user/searchCategory',
+			type:'post',
 			dataType:'json',
+			data:{
+				'id':id,
+				'price':price
+			},
 			success:function(data){
-				$('#showProduct').html(data);
-				$('#pageAdd').html('');
+				$('#showProduct').html(data['out']);
+				$("#pageAdd").html('');
 			}
 		});
 	});
@@ -80,7 +88,7 @@ $(document).ready(function(){
 	// search size
 	$(document).on('click','.size',function(){
 		var id =$('input[name="checkSize"]:checked').attr('data-id');
-		console.log(id);
+		$('#search').val('');
 		$.ajax({
 			url:'/user/searchSize/'+id,
 			type:'get',
@@ -148,12 +156,14 @@ $(document).ready(function(){
 
 	$(document).on('change','#searchPrice',function(){
 		var value = $('#searchPrice option:selected').val();
+		var product = $('#search').val();
 		$.ajax({
 			url:'/user/filterPrice',
 			type:'post',
 			dataType:'json',
 			data:{
-				'value':value
+				'value':value,
+				'product':product
 			},
 			success:function(data){
 				setTimeout(function(){

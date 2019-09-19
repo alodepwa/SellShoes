@@ -1,7 +1,6 @@
 <?php
 
 namespace App\Http\Controllers;
-
 use App\ProductSize;
 use Illuminate\Http\Request;
 
@@ -41,10 +40,10 @@ class ProductSizeController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \App\ProductSize  $productSize
+     * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show(ProductSize $productSize)
+    public function show($id)
     {
         //
     }
@@ -52,10 +51,10 @@ class ProductSizeController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\ProductSize  $productSize
+     * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit(ProductSize $productSize)
+    public function edit($id)
     {
         //
     }
@@ -64,10 +63,10 @@ class ProductSizeController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\ProductSize  $productSize
+     * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, ProductSize $productSize)
+    public function update(Request $request, $id)
     {
         //
     }
@@ -75,10 +74,10 @@ class ProductSizeController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\ProductSize  $productSize
+     * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy(ProductSize $productSize)
+    public function destroy($id)
     {
         //
     }

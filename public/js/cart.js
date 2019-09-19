@@ -5,12 +5,26 @@ $(document).ready(function(){
 		}
 
 	});
+	
+	function numberFormat(number){
+		var dem=1;
+		var newNumber=0;
+		for (var i = number.length; i < number.length; i-3) {
+			// dem++;
+			// if(dem==3){
+			// 	newNumber = ','+number[i];
+			// }
+			newNumber = ',' + number[i];
+		}
+		console.log(newNumber);
+	}
+
+	numberFormat('12003');
 	// load giá thay đổi theo sl
 	$(document).on('click','button[type="button"]',function(){
 		var value = $(this).attr('data-click');
 		var size = $(this).attr('data-size');
 		var value2 = $('.'+value+'and'+size).val();
-		console.log(value+'_'+value2);
 		$.ajax({
 			url:'/user/showPrice',
 			type:'post',
@@ -26,11 +40,15 @@ $(document).ready(function(){
 					$(this).find('.total').each(function(){
 						var price = $(this).text();
 						if(price.length !=0){
-							total+=parseFloat(price);
+							console.log(price.valueOf());
+
+							total+=parseFloat(price.valueOf());
+							// total+=Number(price.valueOf());
 						}
 					});
+					return total;
 				});
-				 $('#total').html(total+' VNĐ');
+				// $('#total').html(total+' VNĐ');
 				var price=[];
 				var quantity=[];
 				$('#tableCart tbody tr').each(function(){
@@ -91,12 +109,16 @@ $(document).ready(function(){
 		$('#tableCart tr').each(function(){
 			$(this).find('.total').each(function(){
 				var price = $(this).text();
+				// console.log(price);
 				if(price.length !=0){
-					total+=parseFloat(price);
+					total+=parseFloat(price,10);
 				}
 			});
 		});
-		$('#total').html(total+' VNĐ');
+		// $('#total').html(total+' VNĐ');
+
+
+
 
 	//checkout
 	$('#checkout').on('click',function(){
@@ -150,9 +172,20 @@ $(document).ready(function(){
 		$('form input[name="productID"]').val(productID);
 
 		
+
+
+		
 	// user order
 	$('.err').hide();
 	$(document).on('click','#order',function(){
+		$('.1').html('');
+		$('.2').html('');
+		$('.3').html('');
+		$('.4').html('');
+		$('.11').html('');
+		$('.22').html('');
+		$('.33').html('');
+		$('.44').html('');
 		var check = $('input[type="checkbox"]:checked').val();
 		if(check==1){
 			var name = $('input[name="dname"]').val();
@@ -193,15 +226,38 @@ $(document).ready(function(){
 				'productID':productID,
 				'quantity':quantity
 			},success:function(data){
+				console.log(data);
 				if(data != undefined && data.errors != undefined){
 					$.each(data.errors, function(key,value){
-						$('.err').show();
-						$('.err').append(value+'<br>');
+						if(check==1){
+							switch(value.charAt(0)){
+							case '1':$('.11').text(value.slice(2));
+								break;
+							case '2':$('.22').text(value.slice(2));
+								break;
+							case '3':$('.33').text(value.slice(2));
+								break;
+							case '4':$('.44').text(value.slice(2));
+								break;
+							}
+						}else{
+							switch(value.charAt(0)){
+							case '1':$('.1').text(value.slice(2));
+								break;
+							case '2':$('.2').text(value.slice(2));
+								break;
+							case '3':$('.3').text(value.slice(2));
+								break;
+							case '4':$('.4').text(value.slice(2));
+								break;
+							}
+						}
 					});
 				}
-				if(data != undefined){
+				else{
+					$('#order').attr('disabled','disabled');
+					$('#order').text('Bạn đã đặt hàng thành công!');
 					$('.count').html('0');
-					alert(data);
 				}
 			}
 		});

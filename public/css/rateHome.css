@@ -53,3 +53,59 @@
         left:2px;
     }
 
+
+.ratingLeft {
+      float:left;
+    }
+
+    /* :not(:checked) is a filter, so that browsers that don’t support :checked don’t 
+      follow these rules. Every browser that supports :checked also supports :not(), so
+      it doesn’t make the test unnecessarily selective */
+    .ratingLeft:not(:checked) > input {
+        position:absolute;
+        top:-9999px;
+        clip:rect(0,0,0,0);
+    }
+
+    .ratingLeft:not(:checked) > label {
+        float:right;
+        width:1em;
+        /* padding:0 .1em; */
+        overflow:hidden;
+        white-space:nowrap;
+        cursor:pointer;
+        font-size:200%;
+        /* line-height:1.2; */
+        color:#ddd;
+    }
+
+    .ratingLeft:not(:checked) > label:before {
+        content: '★ ';
+    }
+
+    .ratingLeft > input:checked ~ label {
+        color: dodgerblue;
+        
+    }
+
+    /*.rating:not(:checked) > label:hover,
+    .rating:not(:checked) > label:hover ~ label {
+        color: dodgerblue;
+        
+    }
+
+    .rating > input:checked + label:hover,
+    .rating > input:checked + label:hover ~ label,
+    .rating > input:checked ~ label:hover,
+    .rating > input:checked ~ label:hover ~ label,
+    .rating > label:hover ~ input:checked ~ label {
+        color: dodgerblue;
+        
+    }*/
+
+    .ratingLeft > label:active {
+        position:relative;
+        top:2px;
+        left:10px;
+    }
+

@@ -13,11 +13,11 @@ class ImageController extends Controller
     public function UpLoadImage(Request $request,$id){
            $validator = Validator::make($request->all(),[
             'name'=>'required',
-            'image'=>'mimes:jpg,png,jpeg|required'
+            'image'=>'required|mimes:jpg,png,jpeg'
         ],[
-            'name.required'=>'Tên ảnh không được để trống!',
-            'image.required'=>'File ảnh không được để trống!',
-            'image.mimes'=>'Đuôi ảnh không đúng định dạng!'
+            'name.required'=>'1.Tên ảnh không được để trống!',
+            'image.required'=>'2.File ảnh không được để trống!',
+            'image.mimes'=>'2.Đuôi ảnh không đúng định dạng!'
         ]);
 
         if($validator->fails()){
@@ -33,7 +33,7 @@ class ImageController extends Controller
             if($image->update($data)){
                 $result =['dataSuccess'=>"Cập nhật thành công!"];
             }else{
-                $result =['dataSuccess'=>"Cập nhật thất bại!"];
+                $result =['dataFail'=>"Cập nhật thất bại!"];
             }
             return Response()->json($result);
         }
@@ -75,13 +75,11 @@ class ImageController extends Controller
     {   
         $validator = Validator::make($request->all(),[
             'name'=>'required',
-            'image'=>'mimes:jpg,png,jpeg|required',
-            'product_id'=>'required'
+            'image'=>'required|mimes:jpg,png,jpeg',
         ],[
-            'name.required'=>'Tên ảnh không được để trống!',
-            'product_id.required'=>'Tên sản phẩm không được để trống!',
-            'image.required'=>'File ảnh không được để trống!',
-            'image.mimes'=>'Đuôi ảnh không đúng định dạng!'
+            'name.required'=>'1.Tên ảnh không được để trống!',
+            'image.required'=>'2.File ảnh không được để trống!',
+            'image.mimes'=>'2.Đuôi ảnh không đúng định dạng!'
            
         ]);
         if($validator->fails()){

@@ -32,6 +32,14 @@ class CommentController extends Controller
         }
         return response()->json(['data'=>$comment,'user'=>$users]);
     }
+
+    public function detailsComment($id){
+        $nameProduct = Product::findOrFail($id);
+        $comment = Comment::where('product_id','=',$id)->orderBy('id','desc')->paginate(7);
+        return view('admin.detailsComment',compact('comment','nameProduct'));
+    }
+
+
     /**
      * Display a listing of the resource.
      *
@@ -39,7 +47,7 @@ class CommentController extends Controller
      */
     public function index()
     {
-        $comment =Comment::where('status','=',1)->paginate(7);
+        $comment =Product::orderBy('id','asc')->paginate(7);
         return view('admin.listComent',compact('comment'));
 
     }

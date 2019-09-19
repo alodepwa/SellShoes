@@ -79,11 +79,11 @@
 			<div class="modal-header">
 				<div class="container">
 					<div class="row">
-						<div class="container "><h4 class="modal-title">Create Size</h4></div>
+						<div class="container "><h4 class="modal-title">Create Image</h4></div>
 					</div>
 						<div class="row notification">
 							<div class="container-fluid">
-								<div class="alert alert-danger mess"></div>
+								<div class="alert alert-success mess"></div>
 							</div>
 						</div>
 				</div>
@@ -94,6 +94,8 @@
 					@csrf
 					<fieldset class="form-group">
 						<label for="formGroupExampleInput">Image Name<small>*</small></label>
+						<br>
+						<label for="" class="1 text-danger"></label>
 						<input type="text" name="name" class="form-control" id="formGroupExampleInput" placeholder="Category Name...">
 					</fieldset>
 					<fieldset class="form-group">
@@ -105,13 +107,14 @@
 						</select>
 					</fieldset>
 					<fieldset class="form-group mt-2">
+						<label for="" class="2 text-danger"></label>
 						<input type="file" name="image" id="image" placeholder="Category Name...">
 					</fieldset>
 				</form>
 			</div>
 			<div class="modal-footer">
 				<button type="button" class="btn btn-primary" id="save">Add</button>
-				<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+				<button type="button" class="btn btn-secondary" id="close" data-dismiss="modal">Close</button>
 				
 			</div>
 		</div><!-- /.modal-content -->
@@ -128,11 +131,16 @@
 			<div class="modal-header">
 				<div class="container">
 					<div class="row">
-						<div class="container "><h4 class="modal-title">Edit Size</h4></div>
+						<div class="container "><h4 class="modal-title">Edit Image</h4></div>
 					</div>
-						<div class="row notification">
+						<div class="row notificationS">
 							<div class="container-fluid">
-								<div class="alert alert-success mess"></div>
+								<div class="alert alert-success messS"></div>
+							</div>
+						</div>
+						<div class="row notificationF">
+							<div class="container-fluid">
+								<div class="alert alert-danger messF"></div>
 							</div>
 						</div>
 				</div>
@@ -143,6 +151,8 @@
 					@csrf
 					<fieldset class="form-group">
 						<label for="formGroupExampleInput">Image Name<small>*</small></label>
+						<br>
+						<label for="" class="11 text-danger"></label>
 						<input type="text" name="name" class="form-control" id="formGroupExampleInput" placeholder="Category Name...">
 					</fieldset>
 					<fieldset class="form-group">
@@ -154,6 +164,7 @@
 						</select>
 					</fieldset>
 					<fieldset class="form-group mt-2">
+						<label for="" class="22 text-danger"></label>
 						<input type="file" name="image" id="img" placeholder="Category Name...">
 					</fieldset>
 				</form>

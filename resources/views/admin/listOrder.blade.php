@@ -96,8 +96,7 @@
             	@endforeach
             </tbody>
         </table>
-
-		<div class="row">
+		<div class="row page">
         	<div class="col-12 d-flex justify-content-center" id="pageAdd">
         		{{$order->links()}}
         	</div>
@@ -107,82 +106,7 @@
 </div>
 
   
-<div class="modal fade" id="myModal">
-	<div class="modal-dialog modal-lg" role="document">
-		<div class="modal-content">
-			<div class="modal-header">
-				<div class="container">
-					<div class="row">
-						<div class="container "><h4 class="modal-title">Comments</h4></div>
-					</div>
-				</div>
-				
-			</div>
-			<div class="modal-body">
-				<table class="table table-inverse">
-					<thead>
-						<tr>
-							<th>#</th>
-		                    <th>User</th>
-		                    <th>Email</th>
-		                    <th>Product</th>
-		                    <th>Quantity</th>
-		                    <th>Prices</th>
-		                    <th>Size</th>
-						</tr>
-					</thead>
-					<tbody id="approve">
-						@foreach($list as $value)
-		            		<tr>
-		            			<td>{{$value->id}}</td>
-		            			<td>{{$value->name}}</td>
-		            			<td>{{$value->email}}</td>
-		            			<td >
-		            				@foreach($value->products as $vl)
-		            					<p class="{{$value->id}}product" data-id="{{$vl->id}}">{{$vl->name}}</p>
-		            				@endforeach
-		            			</td>
-		            			<td >
-		            				@foreach($value->products as $quantity)
-		            					<p class="{{$value->id}}quantity" data-id="{{$quantity->pivot->quantity}}">{{$quantity->pivot->quantity}}</p>
-		            				@endforeach
-		            			</td>
-		            			<td>
-		            				@foreach($value->products as $quantity)
-		            					<p>{{$quantity->pivot->price}}</p>
-		            				@endforeach
-		            			</td>
-		            			<td >
-		            				<?php 
-		            					foreach ($value->products as $vl) {
-		            						$checkSize = $vl->pivot->size;
-		            						foreach ($size as $key => $vl) {
-		            						if($checkSize == $vl->id){
-		            							echo '<p class="'.$value->id.'size" data-id='.$vl->id.'>'.$vl->name.'</p>';
-		            						}
-		            					}
-		            						
-		            					}
 
-		            				 ?>
-		            			</td>
-		            		</tr>
-		            	@endforeach
-					</tbody>
-					<div class="row">
-			        	<div class="col-12 d-flex justify-content-center" id="pageAdd">
-			        		{{$list->links()}}
-			        	</div>
-					</div> 
-				</table>
-			</div>
-			<div class="modal-footer">
-				<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-				
-			</div>
-		</div><!-- /.modal-content -->
-	</div><!-- /.modal-dialog -->
-</div><!-- /.modal -->
 </div>
 
 

@@ -9,9 +9,17 @@ $(document).ready(function(){
 	});
 
 	$('.notificationS').hide();
-	$('.notificationE').hide();
+	$('.notificationF').hide();
 
+// thêm mới sản phẩm
 	$(document).on('click','#save',function(e){
+		$('.1').html('');
+		$('.2').html('');
+		$('.3').html('');
+		$('.4').html('');
+		$('.5').html('');
+		$('.messS').html('');
+		$('.messF').html('');
 		e.preventDefault();
 		$('.notification').show();
 		$('.messE').html('');
@@ -30,14 +38,34 @@ $(document).ready(function(){
 				'description':$('#addProduct textarea[name="description"]').val(),
 			},
 			success:function(data){
+				// console.log(data);
 				if(data != undefined && data.errors !=undefined){
+					$('.notificationS').hide();$('.notificationF').hide();
 					$.each(data.errors, function(key,value){
-						$('.notificationE').show();
-						$('.messE').append(value+'<br>');
+						switch(value.charAt(0)){
+							case '1':$('.1').text(value.slice(2));
+								break;
+							case '2': $('.2').text(value.slice(2));
+								break;
+							case '3': $('.3').text(value.slice(2));
+								break;
+							case '4': $('.4').text(value.slice(2));
+								break;
+							case '5': $('.5').text(value.slice(2));
+								break;
+						}
 					});
 				}else{
-					$('.notificationE').hide();
-					alert(data['dataSuccess']);
+					if(data['dataSuccess']!= null){
+						$('.notificationS').show();
+						$('.messS').html(data['dataSuccess']);
+						$('.notificationF').hide();
+					}else{
+						$('.notificationF').show();
+						$('.messF').html(data['dataFail']);
+						$('.notificationS').hide();
+					}
+					$('#save').attr('disabled',true);
 				}
 			},
 			error:function(error){
@@ -48,7 +76,11 @@ $(document).ready(function(){
 			$("#pageAdd").load(" #pageAdd");
 		});
 	});  
+
+	$('#add').attr('disabled',false);
 	// end add
+
+
 
 	// start delete
 	$(document).on('click', '.delete_Cate', function(e){
@@ -78,8 +110,12 @@ $(document).ready(function(){
 		}
 	});
 
+
 		// start edit
+		$('.notificationES').hide();
+		$('.notificationEF').hide();
 		$(document).on("click",'.editPro', function(){
+			$('#save_Edit_Cate').attr('disabled',false);
 			$('.notification').hide();
 			var id = $(this).attr("data-id");
 			$.ajax({
@@ -99,6 +135,13 @@ $(document).ready(function(){
 			});
 			$('#save_Edit_Cate').on("click", function(){
 				$('.mess').html('');
+				$('.11').html('');
+				$('.22').html('');
+				$('.33').html('');
+				$('.44').html('');
+				$('.55').html('');
+				$('.messES').html('');
+				$('.messEF').html('');
 				$.ajax({
 					url:'/admin/product/'+id,
 					type:'PUT',
@@ -117,13 +160,33 @@ $(document).ready(function(){
 					success:function(data){
 						if(data !=undefined && data.errors != undefined){
 							$.each(data.errors,function(key,value){
-								$('.notification').show();
-								$('.mess').append('<p>'+value+'</p>');
+								switch(value.charAt(0)){
+									case '1':$('.11').text(value.slice(2));
+										break;
+									case '2':$('.22').text(value.slice(2));
+											break;
+									case '3':$('.33').text(value.slice(2));
+											break;
+									case '4':$('.44').text(value.slice(2));
+											break;
+									case '5':$('.55').text(value.slice(2));
+										break;
+								
+								}
 							});
 						}else{
-							$('.notification').hide();
-							alert(data['message']);
+							if(data['message']!=null){
+								$('.notificationES').show();
+								$('.messES').html(data['message']);
+								$('.notificationEF').hide();
+							}else{
+								$('.notificationEF').show();
+								$('.messES').html(data['messageFail']);
+								$('.notificationES').hide();
+							}
+							$('#save_Edit_Cate').attr('disabled',true);
 						}
+						
 						$("#table_Cate").load(' #table_Cate');
 					},
 					error:function(error,statusText){
@@ -134,54 +197,69 @@ $(document).ready(function(){
 		});
 
 		$("#close_Edit").on("click", function(){
-			id=null;
+			$('#save_Edit_Cate').attr('disabled',false);
 		});
 
 	});
 
 	// start updateQuantity
-	$(document).on('click','.updateQuantity',function(){
+	$('.notificationU').hide();
+	var size_id;
+	$(document).on('click','.updateQuantity',function(e){
+		e.preventDefault();
+		$('#updateQuantity').attr('disabled',false);
+		$('.111').html('');
+		$('.messU').html('');
 		$('.notification').hide();
+		$('.notificationU').hide();
 		var id =$(this).attr("data-id");
-		var size_id;
+		
 		$.ajax({
 			url:'/admin/product/editPro/'+id,
 			type:'GET',
 			dataType:'json',
 			data:{},
 			success:function(data){
+				// console.log(data);
 				$('#formUpdateQuantity input[name="name"]').val(data.data['name']);
 				$('#formUpdateQuantity input[name="quantity"]').val(data['quantity']);
+				$('#formUpdateQuantity input[name="idPro"]').val(data.data.id);
 				size_id = data['size'];
 			}
 		});
-		$('#updateQuantity').on('click',function(){
+		
+	});
+
+	$(document).on('click','#updateQuantity',function(){
+			$('.111').html('');
+			$('.messU').html('');
 			if(confirm('Bạn có muốn thêm số lượng?')){
+			var idProduct = $('#formUpdateQuantity input[name="idPro"]').val();
 			$.ajax({
 				url:'/admin/product/updateQuantity',
 				type:'post',
 				dataType:'json',
 				data:{
-					'id':id,
+					'id':idProduct,
 					'quantity':$('#formUpdateQuantity input[name="quantity"]').val(),
 					'size_id':size_id
 				},	
 				success:function(data){
-					console.log(data);
+					// console.log(data);
 					if(data != undefined && data.errors != undefined){
-						$.each(data.errors,function(key,value){
-							$('.notification').hide();
-							$('.mess').append('<p>'+value+'</p>')
-						});
+						// $.each(data.errors,function(key,value){
+						// 	$('.111').text(value);
+						// });
+						$('.111').text(data.errors);
 					}else{
-						alert(data['dataSuccess']);
+						$('.notificationU').show();
+						$('.messU').html(data['dataSuccess']);
+						$('#updateQuantity').attr('disabled',true);
 					}
 				}
 			});
 			}
 		});
-	});
-
 
 	// start popover
 	$('.hover').popover({
@@ -193,7 +271,7 @@ $(document).ready(function(){
 	function fetchData(){
 		var dataShow = "";
 		var id = $(this).attr('productID');
-		console.log(id);
+		// console.log(id);
 		$.ajax({
 			url:'/admin/product/popover/'+id,
 			dataType:'json',

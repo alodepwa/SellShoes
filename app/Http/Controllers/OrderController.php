@@ -44,7 +44,7 @@ class OrderController extends Controller
     }
     public function loadListOrder(Request $request){
         $value = $request->value;
-        $order = Order::where('status','=',$value)->paginate(7);
+        $order = Order::where('status','=',$value)->paginate(8);
         $size = Size::all();
         $out='';
         if($value==1){
@@ -78,6 +78,7 @@ class OrderController extends Controller
                             </td>
                         </tr>';
             }
+            
         }else if($value==2){
             foreach ($order as $key => $value) {
                 $out.='<tr><td>'.$value->id.'</td><td>'.$value->name.'</td><td >'.$value->email.'</td><td>';
@@ -139,11 +140,11 @@ class OrderController extends Controller
                         </tr>';
             }
         }
-        $paginate='<div class="row">
+        $paginate='
             <div class="col-12 d-flex justify-content-center" id="pageAdd">
                 '.$order->links().'
             </div>
-        </div>';
+        ';
         $result =['out'=>$out,'paginate'=>$paginate];
 
         return response()->json($result);
@@ -155,7 +156,7 @@ class OrderController extends Controller
      */
     public function index()
     {
-        $order = Order::where('status','=',1)->paginate(7);
+        $order = Order::where('status','=',1)->orderBy('id','desc')->paginate(7);
         $size = Size::all();
         foreach ($order as $key => $value) {
             $order2=$value->products;
@@ -163,7 +164,7 @@ class OrderController extends Controller
                 $order3=$value->pivot->status;
             }
         }
-        $list  = Order::where('status','=',2)->paginate(7);
+        $list  = Order::where('status','=',2)->orderBy('id','desc')->paginate(7);
         return view('admin.listOrder',compact('order','size','list'));
     }
 

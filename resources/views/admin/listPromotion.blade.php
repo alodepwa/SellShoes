@@ -100,11 +100,16 @@
 			<div class="modal-header">
 				<div class="container">
 					<div class="row">
-						<div class="container "><h4 class="modal-title">Create Brand</h4></div>
+						<div class="container "><h4 class="modal-title">Create Promotion</h4></div>
 					</div>
-						<div class="row notification">
+						<div class="row notificationS">
 							<div class="container-fluid">
-								<div class="alert alert-danger mess"></div>
+								<div class="alert alert-success mess"></div>
+							</div>
+						</div>
+						<div class="row notificationF">
+							<div class="container-fluid">
+								<div class="alert alert-danger messF"></div>
 							</div>
 						</div>
 				</div>
@@ -118,10 +123,14 @@
 						<div class="row">
 							<div class="col-sm-6">
 								<label for="formGroupExampleInput">Promotion Name<small>*</small></label>
+								<br>
+								<label for="" class="text-danger 1"></label>
 								<input type="text" name="name" class="form-control" id="formGroupExampleInput" placeholder="Category Name...">
 							</div>
 							<div class="col-sm-6">
 								<label for="formGroupExampleInput2">Unit<small>*</small></label>
+								<br>
+								<label for="" class="text-danger 2"></label>
 								<input type="number" name="unit" class="form-control" id="formGroupExampleInput2" placeholder="Category Name...">
 							</div>
 						</div>
@@ -130,16 +139,22 @@
 						<div class="row">
 							<div class="col-sm-6">
 								<label for="formGroupExampleInput3">Start Day Promotion<small>*</small></label>
+								<br>
+								<label for="" class="text-danger 3"></label>
 								<input type="date" name="start" class="form-control" id="formGroupExampleInput3" placeholder="Category Name...">
 							</div>
 							<div class="col-sm-6">
 								<label for="formGroupExampleInput4">End Day Promotion<small>*</small></label>
+								<br>
+								<label for="" class="text-danger 4"></label>
 								<input type="date" name="end" class="form-control" id="formGroupExampleInput4" placeholder="Category Name...">
 							</div>
 						</div>
 					</fieldset>
 					<fieldset class="form-group">
 						<label for="formGroupExampleInput5">Product ID<small>*</small></label>
+						<br>
+								<label for="" class="text-danger 5"></label>
 						<select name="product_id"class="form-control" placeholder="Category Name...">
 							@foreach($listProduct as $value)
 							{{$value}}
@@ -168,11 +183,16 @@
 			<div class="modal-header">
 				<div class="container">
 					<div class="row">
-						<div class="container "><h4 class="modal-title">Edit Brand</h4></div>
+						<div class="container "><h4 class="modal-title">Edit Promotion</h4></div>
 					</div>
-						<div class="row notification">
+						<div class="row notificationES">
 							<div class="container-fluid">
-								<div class="alert alert-success mess"></div>
+								<div class="alert alert-success messES"></div>
+							</div>
+						</div>
+						<div class="row notificationEF">
+							<div class="container-fluid">
+								<div class="alert alert-danger messEF"></div>
 							</div>
 						</div>
 				</div>
@@ -185,10 +205,14 @@
 						<div class="row">
 							<div class="col-sm-6">
 								<label for="formGroupExampleInput">Promotion Name<small>*</small></label>
+								<br>
+								<label for="" class="text-danger 11"></label>
 								<input type="text" name="name" class="form-control" id="formGroupExampleInput" placeholder="Category Name...">
 							</div>
 							<div class="col-sm-6">
 								<label for="formGroupExampleInput2">Unit<small>*</small></label>
+								<br>
+								<label for="" class="text-danger 22"></label>
 								<input type="number" name="unit" max="100" class="form-control" id="formGroupExampleInput2" placeholder="Category Name...">
 							</div>
 						</div>
@@ -197,16 +221,21 @@
 						<div class="row">
 							<div class="col-sm-6">
 								<label for="formGroupExampleInput3">Start Day Promotion<small>*</small></label>
+								<br>
+								<label for="" class="text-danger 33"></label>
 								<input type="date" name="start" class="form-control" id="formGroupExampleInput3" placeholder="Category Name...">
 							</div>
 							<div class="col-sm-6">
 								<label for="formGroupExampleInput4">End Day Promotion<small>*</small></label>
+								<br>
+								<label for="" class="text-danger 44"></label>
 								<input type="date" name="end" class="form-control" id="formGroupExampleInput4" placeholder="Category Name...">
 							</div>
 						</div>
 					</fieldset>
 					<fieldset class="form-group">
 						<label for="formGroupExampleInput5">Product ID<small>*</small></label>
+						<br>
 						<select name="product_id"class="form-control" placeholder="Category Name...">
 							@foreach($listProduct as $value)
 							{{$value}}
@@ -217,7 +246,7 @@
 				</form>
 			</div>
 			<div class="modal-footer">
-				<button type="button" class="btn btn-primary" id="saveEditPromotion">Save changes</button>
+				<button type="button" class="btn btn-primary"  id="saveEditPromotion">Save changes</button>
 				<button type="button" class="btn btn-secondary" id="close_Edit" data-dismiss="modal">Close</button>
 				
 			</div>

@@ -1,9 +1,6 @@
 <?php
 // admin 
 
-
-
-
 Route::group(['prefix'=>'admin','middleware'=>['checkLogin','checkAdmin','web']],function(){
 
 	Route::get('/home',function(){
@@ -87,7 +84,7 @@ Route::group(['prefix'=>'admin','middleware'=>['checkLogin','checkAdmin','web']]
 	Route::post('user/search','LoadPageController@search');
 
 	// search category
-	Route::get('user/searchCategory/{id}','LoadPageController@searchCategory');
+	Route::post('user/searchCategory','LoadPageController@searchCategory');
 
 	// search size
 	Route::get('user/searchSize/{id}','LoadPageController@searchSize');
@@ -130,5 +127,6 @@ Route::group(['prefix'=>'user','middleware'=>['web','checkLogin']],function(){
 	Route::get('cancelOrder/{id}','ManagementOrderController@cancelOrder')->name('cancelOrder');
 	Route::get('comment/{id}{id2}','CommentController@comment')->name('comment');
 	Route::post('comment','CommentController@commentPost')->name('commentPost');
+	Route::get('detailsComments/{id}','CommentController@detailsComment')->name('detailsComment');
 });
 

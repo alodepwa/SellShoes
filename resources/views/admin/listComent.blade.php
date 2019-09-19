@@ -25,17 +25,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-sm-8">
-                <div class="page-header float-right">
-                    <div class="page-title ">
-                        <ol class="breadcrumb  text-right">
-                            <li class="active "><a href="" data-toggle="modal" data-target="#myModal" id="add" class="btn btn-success">Waite For Aprrove</a></li>
-                        </ol>
-                    </div>
-                </div>
-            </div>
         </div>
-
 
 <div class="col-sm-12" >
 	<div class="container-fluid category">
@@ -43,23 +33,22 @@
             <thead>
                 <tr>
                     <th>#</th>
-                    <th>User</th>
                     <th>Product</th>
-                    <th>Vote</th>
-                    <th>Comment</th>
+                    <th>Comments</th>
                     <th>Action</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach($comment as $value)
+                <?php 
+                	$numberComment = $value->comments->count('id');
+                 ?>
 					<tr>
-						<td width="5%">{{$value["id"]}}</td>
-						<td width="15%">{{$value->user->name}}</td>
-						<td width="15%">{{$value->product->name}}</td>
-						<td width="10%">{{$value['rate']}}</td>
-						<td width="45%">{{$value['content']}}</td>
+						<td width="10%">{{$value["id"]}}</td>
+						<td width="25%">{{$value->name}}</td>
+						<td width="15%">{{$numberComment}}</td>
 						<td width="10%">
-							<a class="btn btn-danger deleteComment" data-id="{{$value->id}}">Delete</a>
+							<a class="btn btn-success" href="{{route('detailsComment',$value->id)}}">View</a>
 						</td>
 					</tr>
                 @endforeach
@@ -68,47 +57,12 @@
 
 		<div class="row">
         	<div class="col-12 d-flex justify-content-center" id="pageAdd">
-        		{{$comment->links()}}
         	</div>
 		</div> <!-- phân trang -->
 
 	</div>
 </div>
 
-  
-<div class="modal fade" id="myModal">
-	<div class="modal-dialog modal-lg" role="document">
-		<div class="modal-content">
-			<div class="modal-header">
-				<div class="container">
-					<div class="row">
-						<div class="container "><h4 class="modal-title">Comments</h4></div>
-					</div>
-				</div>
-				
-			</div>
-			<div class="modal-body">
-				<table class="table table-inverse">
-					<thead>
-						<tr>
-							<th>#</th>
-							<th>User</th>
-							<th>Vote</th>
-							<th>Content</th>
-							<th>Action</th>
-						</tr>
-					</thead>
-					<tbody id="approve">
-					</tbody>
-				</table>
-			</div>
-			<div class="modal-footer">
-				<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-				
-			</div>
-		</div><!-- /.modal-content -->
-	</div><!-- /.modal-dialog -->
-</div><!-- /.modal -->
 </div>
 
 

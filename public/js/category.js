@@ -12,6 +12,7 @@ $(document).ready(function(){
 
 	// start add category
 	$('#save').click(function(e){
+		$('.mess').html('');
 		e.preventDefault();
 		$('.notification').show();
 		$.ajax({
@@ -29,7 +30,9 @@ $(document).ready(function(){
 						$('.mess').append(value);
 					});
 				}else{
-					alert(data['dataSuccess']);
+					$('.notification').show();
+					$('.mess').append(data['dataSuccess']);
+					// alert(data['dataSuccess']);
 				}
 			},
 			error:function(error){
@@ -70,10 +73,10 @@ $(document).ready(function(){
 		// start edit category
 		$(document).on("click",'.edit_Cate', function(){
 			var id = $(this).attr("data-id");
-			console.log(id);
 			var name = $(this).attr("data-name");
 			$('input[name="name"]').val(name);
 			$('#save_Edit_Cate').on("click", function(){
+				$('.mess').html('');
 				$.ajax({
 					url:'/admin/category/'+id,
 					type:'PUT',
@@ -88,7 +91,9 @@ $(document).ready(function(){
 								$('.mess').append(value);
 							});
 						}else{
-							alert(data['dataSuccess']);
+							$('.notification').show();
+							$('.mess').append(data['dataSuccess']);
+							// alert(data['dataSuccess']);
 						}
 						$("#table_Cate").load(' #table_Cate');
 					}

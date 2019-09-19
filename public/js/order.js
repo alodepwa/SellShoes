@@ -76,7 +76,7 @@ $(document).ready(function(){
 			},
 			success:function(data){
 				$('#table_Cate tbody').html(data['out']);
-				$('#pageAdd').html(data['paginate']);
+				$('.page').html(data['paginate']);
 			}
 		});
 	});	
