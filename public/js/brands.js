@@ -11,7 +11,7 @@ $(document).ready(function(){
 	$('.notification').hide();
 
 	// start add brands
-	$('#save').click(function(e){
+	$(document).on('click','#save',function(e){
 		$('.mess').html('');
 		e.preventDefault();
 		console.log('alo');
@@ -51,7 +51,7 @@ $(document).ready(function(){
 			var id = $(this).attr("data-id");
 			var name = $(this).attr("data-name");
 			$('input[name="name"]').val(name);
-			$('#save_Edit_Cate').on("click", function(){
+			$(document).on("click",'#save_Edit_Cate', function(){
 				$.ajax({
 					url:'/admin/brand/'+id,
 					type:'PUT',
@@ -61,6 +61,7 @@ $(document).ready(function(){
 						'description':$('#form_edit input[name="description"]').val()
 					},
 					success:function(data){
+						console.log(data);
 						if(data !=undefined && data.errors !=undefined){
 							$.each(data.errors,function(key,value){
 								$('.notification').show();

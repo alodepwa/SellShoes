@@ -76,12 +76,7 @@ $(document).ready(function(){
 					data:{
 					},
 					success:function(data){
-						console.log('success');
-						console.log(data);
 						alert(data.message);
-						var number=data.data[0]['countUser'];
-						var showNumber = "<p >"+number+"</p>"
-						$('#numberUser').html(showNumber);
 					}
 				});
 			}else{

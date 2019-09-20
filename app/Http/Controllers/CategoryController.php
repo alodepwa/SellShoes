@@ -54,7 +54,7 @@ class CategoryController extends Controller
                 $cate = Category::create($data);
                 $result = ['dataSuccess'=>'Create Category Success!'];
             }else{
-                $result=['dataSuccess'=>"Category Already Exists!"];
+                $result=['dataFail'=>"Category Already Exists!"];
             }
             
             return response()->json($result);

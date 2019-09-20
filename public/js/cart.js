@@ -216,7 +216,7 @@ $(document).ready(function(){
 		$.ajax({
 			url:'/user/order',
 			dataType:'json',
-			type:'POST',
+			type:'post',
 			data:{
 				'name':name,
 				'tel':tel,
@@ -257,6 +257,7 @@ $(document).ready(function(){
 				else{
 					$('#order').attr('disabled','disabled');
 					$('#order').text('Bạn đã đặt hàng thành công!');
+					alert(data);
 					$('.count').html('0');
 				}
 			}
@@ -268,10 +269,17 @@ $(document).ready(function(){
 	$(document).on('click','.cancleOrder',function(){
 		if(confirm('Bạn có muốn hủy đơn hàng này')){
 			var id = $(this).attr('data-id');
+			var idProduct = $(this).attr('data-product');
+			var idSize = $(this).attr('data-size');
 			$.ajax({
-				url:'/user/cancelOrder/'+id,
+				url:'/user/cancelOrder',
 				dataType:'json',
-				method:'GET',
+				method:'post',
+				data:{
+					'id':id,
+					'idProduct':idProduct,
+					'idSize':idSize
+				},
 				success:function(data){
 					alert(data['success']);
 					$('#autoload').load(' #autoload');

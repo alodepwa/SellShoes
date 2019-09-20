@@ -77,9 +77,10 @@ $(document).ready(function(){
 		});
 	});  
 
-	$('#add').attr('disabled',false);
+	$('#add').click(function(){
+		$(this).attr('disabled',false);
+	})
 	// end add
-
 
 
 	// start delete
@@ -117,6 +118,8 @@ $(document).ready(function(){
 		$(document).on("click",'.editPro', function(){
 			$('#save_Edit_Cate').attr('disabled',false);
 			$('.notification').hide();
+			$('.notificationES').hide();
+			$('.notificationEF').hide();
 			var id = $(this).attr("data-id");
 			$.ajax({
 				url:'/admin/product/editPro/'+id,

@@ -308,7 +308,7 @@
                     }
 
                    ?>
-                  @if($sold >100)
+                  @if($sold >20)
                   <div class="row ">
                     <div class="col-md-12">
                       <div class="row d-flex flex-row ml-1 mr-1 mt-1  border-top ">

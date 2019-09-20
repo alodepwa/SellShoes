@@ -27,6 +27,7 @@ $(document).ready(function(){
 			});
 		});
 
+		var idProduct = $(this).attr('data-product');
 		$.ajax({
 			url:'/admin/order/yes',
 			type:'POST',
@@ -35,7 +36,8 @@ $(document).ready(function(){
 				'id':id,
 				'size':size,
 				'product':product,
-				'quantity':quantity
+				'quantity':quantity,
+				'idProduct':idProduct,
 			},success:function(data){
 				console.log(data);
 				alert(data);
@@ -49,11 +51,16 @@ $(document).ready(function(){
 	// disApprove oder from users
 	$(document).on('click','.no',function(){
 		var id = $(this).attr('data-id');
+		var idProduct = $(this).attr('data-product');
 		if(confirm('bạn có muốn hủy đơn hàng này')){
 			$.ajax({
-				url:'/admin/orders/'+id,
-				type:'DELETE',
+				url:'/admin/order/no',
+				type:'post',
 				dataType:'json',
+				data:{
+					'id':id,
+					'idProduct':idProduct
+				},
 				success:function(data){
 					alert(data);
 					$('#table_Cate').load(' #table_Cate');

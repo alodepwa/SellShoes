@@ -86,6 +86,11 @@
 								<div class="alert alert-success mess"></div>
 							</div>
 						</div>
+						<div class="row notificationF">
+							<div class="container-fluid">
+								<div class="alert alert-danger messF"></div>
+							</div>
+						</div>
 				</div>
 			</div>
 			<div class="modal-body">

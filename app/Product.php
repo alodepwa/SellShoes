@@ -40,6 +40,6 @@ class Product extends Model
         return $this->hasMany('App\Comment');
     }
     public function orders(){
-        return $this->belongsToMany('App\Order','order__products','product_id','order_id')->withPivot('quantity','price','size')->withTimestamps();
+        return $this->belongsToMany('App\Order','order__products','product_id','order_id')->withPivot('quantity','price','size','status')->withTimestamps();
     }
 }

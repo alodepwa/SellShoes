@@ -12,6 +12,17 @@ use Illuminate\Http\Request;
 class OrderController extends Controller
 {
     
+    // no-approve order
+    public function dissOrder(Request $request){
+         $id = $request->get('id');
+         $idProduct = $request->get('idProduct');
+        if(Order::find($id)->products()->updateExistingPivot($idProduct,['status'=>3])){
+            $result="Hủy đơn thành công!";
+        }else{
+            $result="Hủy đơn thất bại!";
+        }
+        return response()->json($result);
+    }
 
     // approve order form users
     public function approveOrder(Request $request){
@@ -19,7 +30,7 @@ class OrderController extends Controller
         $quantity = explode(';', $request->get('quantity'));
         $product =explode(';', $request->get('product'));
         $size = explode(';', $request->get('size'));
-
+        $idProduct = $request->get('idProduct');
         for ($i=0; $i <count($product)-1 ; $i++) { 
             $price=Product::findOrFail($product[$i]);
             foreach ($price->sizes as $key => $value) {
@@ -30,8 +41,7 @@ class OrderController extends Controller
                         $update[$size[$i]]=['quantity'=>$newQuantity];
                         $price->sizes()->syncWithoutDetaching($update);
                         $order =Order::findOrFail($id); 
-                        $order['status']=2;
-                        $order->save();
+                        $order->products()->updateExistingPivot($idProduct,['status'=>2]);
                         $result="Thêm mới thành công vào order";
                     }else{
                         $result="số lượng trong kho không đủ";
@@ -44,100 +54,90 @@ class OrderController extends Controller
     }
     public function loadListOrder(Request $request){
         $value = $request->value;
-        $order = Order::where('status','=',$value)->paginate(8);
+        $order = Order::orderBy('id','desc')->paginate(8);
         $size = Size::all();
         $out='';
         if($value==1){
             foreach ($order as $key => $value) {
-                $out.='<tr><td>'.$value->id.'</td><td>'.$value->name.'</td><td >'.$value->email.'</td><td>';
-                foreach($value->products as $vl){
-                    $out.='<p class="'.$value->id.'product" data-id="'.$vl->id.'">'.$vl->name.'</p>';
-                }
-                $out.='</td><td>';
-                foreach ($value->products as $quantity) {
-                            $out.='<p class="'.$value->id.'quantity" data-id="'.$quantity->pivot->quantity.'">'.$quantity->pivot->quantity.'</p>';
-                }
-                $out.='</td><td>';
-                foreach ($value->products as $quantity) {
-                    $out.='<p>'.$quantity->pivot->price.'</p>';
-                }
-                $out.='</td><td>';
-                foreach ($value->products as $vl) {
-                    $checkSize = $vl->pivot->size;
-                    foreach ($size as $key => $vl) {
-                    if($checkSize == $vl->id){
-                        $out.= '<p class="'.$value->id.'size" data-id='.$vl->id.'>'.$vl->name.'</p>';
-                    }
-                }
-                    
-                }
-                $out.='</td>
+                foreach ($value->products as $key => $val) {
+                    if ($val->pivot->status==1) {
+                        $out.='<tr><td>'.$value->id.'</td><td>'.$value->name.'</td><td >'.$value->email.'</td><td>
+                        <p class="'.$value->id.'product" data-id="'.$val->id.'">'.$val->name.'</p>
+                        </td><td>
+                        <p class="'.$value->id.'quantity" data-id="'.$val->pivot->quantity.'">'.$val->pivot->quantity.'</p>
+                        </td><td>
+                        <p>'.$val->pivot->price.'</p>
+                        </td><td>';
+                        $checkSize = $val->pivot->size;
+                        foreach ($size as $key => $vl) {
+                            if($checkSize == $vl->id){
+                                $out.= '<p class="'.$value->id.'size" data-id='.$vl->id.'>'.$vl->name.'</p>';
+                            }
+                        }
+                        $out.='</td>
                             <td>
                                 <button class="btn-info yes" data-id="'.$value->id.'">yes</button>
                                 <button class="btn-danger no" data-id="'.$value->id.'">no</button>
                             </td>
                         </tr>';
+                    }
+                }
+
             }
             
         }else if($value==2){
-            foreach ($order as $key => $value) {
-                $out.='<tr><td>'.$value->id.'</td><td>'.$value->name.'</td><td >'.$value->email.'</td><td>';
-                foreach($value->products as $vl){
-                    $out.='<p class="'.$value->id.'product" data-id="'.$vl->id.'">'.$vl->name.'</p>';
-                }
-                $out.='</td><td>';
-                foreach ($value->products as $quantity) {
-                            $out.='<p class="'.$value->id.'quantity" data-id="'.$quantity->pivot->quantity.'">'.$quantity->pivot->quantity.'</p>';
-                }
-                $out.='</td><td>';
-                foreach ($value->products as $quantity) {
-                    $out.='<p>'.$quantity->pivot->price.'</p>';
-                }
-                $out.='</td><td>';
-                foreach ($value->products as $vl) {
-                    $checkSize = $vl->pivot->size;
-                    foreach ($size as $key => $vl) {
-                    if($checkSize == $vl->id){
-                        $out.= '<p class="'.$value->id.'size" data-id='.$vl->id.'>'.$vl->name.'</p>';
-                    }
-                }
-                    
-                }
-                $out.='</td>
+           foreach ($order as $key => $value) {
+                foreach ($value->products as $key => $val) {
+                    if ($val->pivot->status==2) {
+                        $out.='<tr><td>'.$value->id.'</td><td>'.$value->name.'</td><td >'.$value->email.'</td><td>
+                        <p class="'.$value->id.'product" data-id="'.$val->id.'">'.$val->name.'</p>
+                        </td><td>
+                        <p class="'.$value->id.'quantity" data-id="'.$val->pivot->quantity.'">'.$val->pivot->quantity.'</p>
+                        </td><td>
+                        <p>'.$val->pivot->price.'</p>
+                        </td><td>';
+                        $checkSize = $val->pivot->size;
+                        foreach ($size as $key => $vl) {
+                            if($checkSize == $vl->id){
+                                $out.= '<p class="'.$value->id.'size" data-id='.$vl->id.'>'.$vl->name.'</p>';
+                            }
+                        }
+                        $out.='</td>
                             <td>
-                                <p class="text-primary">Đang giao hàng</p>
+                                <button class="btn-info yes" data-id="'.$value->id.'">yes</button>
+                                <button class="btn-danger no" data-id="'.$value->id.'">no</button>
                             </td>
                         </tr>';
+                    }
+                }
+
             }
         }else{
             foreach ($order as $key => $value) {
-                $out.='<tr><td>'.$value->id.'</td><td>'.$value->name.'</td><td >'.$value->email.'</td><td>';
-                foreach($value->products as $vl){
-                    $out.='<p class="'.$value->id.'product" data-id="'.$vl->id.'">'.$vl->name.'</p>';
-                }
-                $out.='</td><td>';
-                foreach ($value->products as $quantity) {
-                            $out.='<p class="'.$value->id.'quantity" data-id="'.$quantity->pivot->quantity.'">'.$quantity->pivot->quantity.'</p>';
-                }
-                $out.='</td><td>';
-                foreach ($value->products as $quantity) {
-                    $out.='<p>'.$quantity->pivot->price.'</p>';
-                }
-                $out.='</td><td>';
-                foreach ($value->products as $vl) {
-                    $checkSize = $vl->pivot->size;
-                    foreach ($size as $key => $vl) {
-                    if($checkSize == $vl->id){
-                        $out.= '<p class="'.$value->id.'size" data-id='.$vl->id.'>'.$vl->name.'</p>';
-                    }
-                }
-                    
-                }
-                $out.='</td>
+                foreach ($value->products as $key => $val) {
+                    if ($val->pivot->status==3) {
+                        $out.='<tr><td>'.$value->id.'</td><td>'.$value->name.'</td><td >'.$value->email.'</td><td>
+                        <p class="'.$value->id.'product" data-id="'.$val->id.'">'.$val->name.'</p>
+                        </td><td>
+                        <p class="'.$value->id.'quantity" data-id="'.$val->pivot->quantity.'">'.$val->pivot->quantity.'</p>
+                        </td><td>
+                        <p>'.$val->pivot->price.'</p>
+                        </td><td>';
+                        $checkSize = $val->pivot->size;
+                        foreach ($size as $key => $vl) {
+                            if($checkSize == $vl->id){
+                                $out.= '<p class="'.$value->id.'size" data-id='.$vl->id.'>'.$vl->name.'</p>';
+                            }
+                        }
+                        $out.='</td>
                             <td>
-                                <p class="text-danger">Đơn hàng đã hủy.</p>
+                                <button class="btn-info yes" data-id="'.$value->id.'">yes</button>
+                                <button class="btn-danger no" data-id="'.$value->id.'">no</button>
                             </td>
                         </tr>';
+                    }
+                }
+
             }
         }
         $paginate='
@@ -156,16 +156,11 @@ class OrderController extends Controller
      */
     public function index()
     {
-        $order = Order::where('status','=',1)->orderBy('id','desc')->paginate(7);
+        
+        $order = Order::orderBy('id','desc')->get();
         $size = Size::all();
-        foreach ($order as $key => $value) {
-            $order2=$value->products;
-            foreach ($order2 as $key => $value) {
-                $order3=$value->pivot->status;
-            }
-        }
-        $list  = Order::where('status','=',2)->orderBy('id','desc')->paginate(7);
-        return view('admin.listOrder',compact('order','size','list'));
+        // $list  = Order::where('status','=',2)->orderBy('id','desc')->paginate(7);
+        return view('admin.listOrder',compact('order','size'));
     }
 
     /**

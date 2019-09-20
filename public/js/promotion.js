@@ -68,6 +68,11 @@ $(document).ready(function(){
 				}
 			});
 	});  
+
+	$(document).on('click','#add',function(){
+		$('.notificationF').hide();
+		$('.notificationS').hide();
+	});
 	// end add
 
 
@@ -105,7 +110,9 @@ $(document).ready(function(){
 	$('.notificationES').hide();
 	$('.notificationEF').hide();
 	$(document).on('click','.edit_Cate', function(){
-
+		$('.notificationES').hide();
+		$('.notificationEF').hide();
+		$('#saveEditPromotion').attr('disabled',false);
 		var id = $(this).attr("data-id");
 		console.log(id);
 		var name = $(this).attr("data-name");

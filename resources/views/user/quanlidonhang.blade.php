@@ -26,7 +26,7 @@
     </div>
   
   <div class="container" id="autoload">
-    <table class="table table-striped">
+    <table class="table ">
       @foreach($orderID as $key => $value)
         <?php 
           foreach ($value->products as $key => $val) {
@@ -35,15 +35,11 @@
             $checkSize = $val->pivot->size;
           }
          ?>
-         <thead>
-          <tr>
-            <th class="product-thumbnail">Đặt ngày:{{$dateOrder}}</th>
-          </tr>
-        </thead>
+         
               <?php 
         foreach ($value->products as $key => $val) {
           $name = $val->name;
-          $productID = $val->pivot->product_id;
+          $productID= $val->pivot->product_id;
         }
         foreach ($product as $key => $vl) {
           if($vl->id == $productID){
@@ -56,33 +52,39 @@
 
        ?>
       <tbody>
-       <tr>
-         <td width="30%">{{$name}}</td>
-         <td width="15%"><img src='{{asset("/upImage/$img")}}' alt=""></td>
-         <td>Qti: {{$quantity}}</td>
-         <td>
-            <?php 
-              foreach ($size as $key => $val) {
-                if($val->id == $checkSize)
-                  echo $val->name;
-              }
-            ?>
-        </td>
-         @if($value->status==1)
-         <td><a href="#" data-id="{{$value->id}}" class="text-danger cancleOrder">Hủy đơn hàng</a></td>
-         @endif
-         @if($value->status==2)
-         <td class="text-body">Đang giao</td>
-         @endif
-         @if($value->status==3)
-         <td class="text-body">Đã hủy</td>
-         @endif
-        @if($value->status==4)
-         <td class="text-success">Giao hàng thành công<br><a href="{{route('comment',[$productID,$checkSize])}}" class="btn btn-warning">Viết nhận xét</a></td>
+        @foreach($value->products as $val)
+          <tr>
+            <td width="30%">{{$val->name}}</td>
+            @foreach($val->images as $vl)
+              <td width="15%">
+                <img src='{{asset("/upImage/$vl->path")}}' alt="">
+              </td>
+            @endforeach
+            <td>Qti: {{$val->pivot->quantity}}</td>
 
-         @endif
-       </tr>
-     </tbody>
+            @foreach($size as $vl)
+              @if($vl->id == $val->pivot->size)
+                <td>
+                  {{$vl->name}}
+                </td>
+                <?php $sizeId = $vl->id; ?>
+              @endif
+            @endforeach
+            @if($val->pivot->status==1)
+             <td><a href="#" data-id="{{$value->id}}" data-size="{{$sizeId}}" data-product ="{{$val->id}}" class="text-danger cancleOrder">Hủy đơn hàng</a></td>
+             @endif
+             @if($val->pivot->status==2)
+             <td class="text-body">Đang giao</td>
+             @endif
+             @if($val->pivot->status==3)
+             <td class="text-body">Đã hủy</td>
+             @endif
+            @if($val->pivot->status==4)
+             <td class="text-success">Giao hàng thành công<br><a href="{{route('comment',[$val->id,$sizeId])}}" class="btn btn-warning">Viết nhận xét</a></td>
+            @endif
+          </tr>
+        @endforeach
+
       @endforeach
    </table>
   </div>

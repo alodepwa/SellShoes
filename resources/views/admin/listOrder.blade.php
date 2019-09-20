@@ -50,55 +50,51 @@
                     <th>Quantity</th>
                     <th>Prices</th>
                     <th>Size</th>
-                    <th>Action</th>
+                    <th>Action</th> 
                 </tr>
             </thead>
             <tbody>
             	@foreach($order as $value)
+                    @foreach($value->products as $val)
+                    @if($val->pivot->status==1)
             		<tr>
             			<td>{{$value->id}}</td>
             			<td>{{$value->name}}</td>
             			<td>{{$value->email}}</td>
             			<td >
-            				@foreach($value->products as $vl)
-            					<p class="{{$value->id}}product" data-id="{{$vl->id}}">{{$vl->name}}</p>
-            				@endforeach
+                            
+                            <p class="{{$value->id}}product" data-id="{{$val->id}}">{{$val->name}}</p>
+            				
             			</td>
             			<td >
-            				@foreach($value->products as $quantity)
-            					<p class="{{$value->id}}quantity" data-id="{{$quantity->pivot->quantity}}">{{$quantity->pivot->quantity}}</p>
-            				@endforeach
+                            <p class="{{$value->id}}quantity" data-id="{{$val->pivot->quantity}}">{{$val->pivot->quantity}}</p>
             			</td>
             			<td>
-            				@foreach($value->products as $quantity)
-            					<p>{{$quantity->pivot->price}}</p>
-            				@endforeach
+            				<p>{{$val->pivot->price}}</p>
             			</td>
             			<td >
             				<?php 
-            					foreach ($value->products as $vl) {
-            						$checkSize = $vl->pivot->size;
-            						foreach ($size as $key => $vl) {
-            						if($checkSize == $vl->id){
-            							echo '<p class="'.$value->id.'size" data-id='.$vl->id.'>'.$vl->name.'</p>';
-            						}
-            					}
-            						
-            					}
-
+                                $checkSize=$val->pivot->size;
+                                foreach ($size as $key => $vl) {
+                                    if($checkSize == $vl->id){
+                                        echo '<p class="'.$value->id.'size" data-id='.$vl->id.'>'.$vl->name.'</p>';
+                                    }
+                                }
             				 ?>
             			</td>
             			<td>
-            				<button class="btn-info yes" data-id="{{$value->id}}">yes</button>
-            				<button class="btn-danger no" data-id="{{$value->id}}">no</button>
+            				<button class="btn-info yes" data-id="{{$value->id}}" data-product ="{{$val->id}}">yes</button>
+            				<button class="btn-danger no" data-id="{{$value->id}}" data-product ="{{$val->id}}">no</button>
             			</td>
             		</tr>
-            	@endforeach
+                    @endif
+            	   @endforeach
+                @endforeach
             </tbody>
         </table>
 		<div class="row page">
         	<div class="col-12 d-flex justify-content-center" id="pageAdd">
-        		{{$order->links()}}
+        		
         	</div>
 		</div> <!-- phân trang -->
 

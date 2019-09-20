@@ -17,20 +17,20 @@ class ManagementOrderController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function cancelOrder($id){
+    // hủy đơn hang
+    public function cancelOrder(Request $request){
+        $id = $request->get('id');
+        $productID = $request->get('idProduct');
+        $idSize = $request->get('idSize');
         $order = Order::findOrFail($id);
         $emailOrder = $order->email;
         $detailOrder = $order->products;
-        foreach ($detailOrder as $key => $value) {
-            $productID = $value->id;
-        }
         $product = Product::findOrFail($productID);
         foreach ($product->images as $key => $value) {
             $path = $value->path;
         }
         $check = Mail::to($emailOrder)->send(new SendMailOrder($order,$path));
-        $order->status=3;
-        $order->save();
+        $order->products()->updateExistingPivot($productID,['status'=>3]);
         return Response()->json(['success'=>'Đơn hàng được hủy thành công'],200);
     }
 
@@ -39,6 +39,7 @@ class ManagementOrderController extends Controller
         $user = \Auth::user();
         $userID = $user->id;
         $orderID = Order::where('user_id','=',$userID)->get();
+        
         $product = Product::all();
         $size = Size::all();
         return view('user.quanlidonhang',compact('orderID','product','size'));

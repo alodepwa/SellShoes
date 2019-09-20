@@ -18,15 +18,13 @@ class LoadPageController extends Controller
     public function order(Request $request){
         $validator = Validator::make($request->all(),[
             'name'=>'required',
-            'tel'=>'numeric|required|min:8|max:10',
+            'tel'=>'numeric|required',
             'email'=>'email|required',
             'address'=>'required'
         ],[
             'name.required'=>'1.Name không được để trống',
             'tel.required'=>'2.Tel không được để trống',
             'tel.numeric'=>'2.Tel cần nhập là số',
-            'tel.min'=>'2.Tel ít nhất 8 số',
-            'tel.max'=>'2.Tel ít hơn 10 số',
             'email.required'=>'3.Email không được để trống',
             'email.email'=>'3.Email không hợp lý',
             'address.required'=>'4.Address không được để trống',
@@ -48,11 +46,11 @@ class LoadPageController extends Controller
                 $ProID[$i]=str_replace(array('{','}'), array('',''),$product[$i]);
                 $priceID[$i]=$this->promotionDetail($ProID[$i]);
                 $productID[$i]=str_replace(array('{','}'), array('',''),$product[$i]);
-                $fill = $this->filterQuantity($productID[$i],$sizeID[0][$i],$sl[$i]);
+                $fill = $this->filterQuantity($productID[$i],$sizeID[$i][0],$sl[$i]);
             }
             if($fill){
               foreach ($productID as $key => $value) {
-                  $order[$value]=['quantity'=>$sl[$key],'price'=>$priceID[$key],'size'=>$sizeID[$key][0]['id']];
+                  $order[$value]=['quantity'=>$sl[$key],'price'=>$priceID[$key],'size'=>$sizeID[$key][0]['id'],'status'=>1];
                   $productName[$key]=Product::findOrFail($value);
               }
               foreach ($productName as $key => $value) {
@@ -445,7 +443,7 @@ class LoadPageController extends Controller
                 }
                 
             }
-                       
+
         }else{
             $out = "không tìm thấy sản phẩm";
              
@@ -946,7 +944,7 @@ class LoadPageController extends Controller
         }
         $promotions = Product::findOrFail($idProduct);
         return view('user.detailProduct',compact('product','categoryAll','comment','comments','promotions'));
-    }
+    } 
     /**
      * Display a listing of the resource.
      *

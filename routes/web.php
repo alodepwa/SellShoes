@@ -54,6 +54,7 @@ Route::group(['prefix'=>'admin','middleware'=>['checkLogin','checkAdmin','web']]
 	Route::resource('orders','OrderController');
 	Route::post('orders/list','OrderController@loadListOrder');
 	Route::post('order/yes','OrderController@approveOrder');
+	Route::post('order/no','OrderController@dissOrder');
 });
 
 
@@ -124,7 +125,7 @@ Route::group(['prefix'=>'user','middleware'=>['web','checkLogin']],function(){
 	// view management order
 	Route::resource('mngOrders','ManagementOrderController');
 
-	Route::get('cancelOrder/{id}','ManagementOrderController@cancelOrder')->name('cancelOrder');
+	Route::post('cancelOrder','ManagementOrderController@cancelOrder')->name('cancelOrder');
 	Route::get('comment/{id}{id2}','CommentController@comment')->name('comment');
 	Route::post('comment','CommentController@commentPost')->name('commentPost');
 	Route::get('detailsComments/{id}','CommentController@detailsComment')->name('detailsComment');
