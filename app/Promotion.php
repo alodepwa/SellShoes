@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Promotion extends Model
 {
     protected $fillable=[
-    	'name','code','unit','start','end','product_id'
+    	'name','unit','start','end','product_id'
     ];
 
     protected $promotions=[

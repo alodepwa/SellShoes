@@ -9,11 +9,20 @@ $(document).ready(function(){
 	});
 
 	$('.notificationS').hide();
-	$('.notificationE').hide();
+	$('.notificationF').hide();
 
+// thêm mới sản phẩm
 	$(document).on('click','#save',function(e){
+		$('.1').html('');
+		$('.2').html('');
+		$('.3').html('');
+		$('.4').html('');
+		$('.5').html('');
+		$('.messS').html('');
+		$('.messF').html('');
 		e.preventDefault();
 		$('.notification').show();
+		$('.messE').html('');
 		$.ajax({
 			url: '/admin/product',
 			type: 'POST',
@@ -24,34 +33,55 @@ $(document).ready(function(){
 				'price':$('#addProduct input[name="price"]').val(),
 				'category_id':$('#addProduct select[name="category_id"]').val(),
 				'brand_id':$('#addProduct select[name="brand_id"]').val(),
-				'size_id':$('#addProduct select[name="size_id"]').val(),
+				'size_id':$('#addProduct select[name="size_id[]"]').val(),
 				'quantity':$('#addProduct input[name="quantity"]').val(),
 				'description':$('#addProduct textarea[name="description"]').val(),
 			},
 			success:function(data){
-				console.log(data);
+				// console.log(data);
 				if(data != undefined && data.errors !=undefined){
+					$('.notificationS').hide();$('.notificationF').hide();
 					$.each(data.errors, function(key,value){
-						$('.notificationE').show();
-						$('.messE').html("");
-						$('.messE').append(value+'<br>');
+						switch(value.charAt(0)){
+							case '1':$('.1').text(value.slice(2));
+								break;
+							case '2': $('.2').text(value.slice(2));
+								break;
+							case '3': $('.3').text(value.slice(2));
+								break;
+							case '4': $('.4').text(value.slice(2));
+								break;
+							case '5': $('.5').text(value.slice(2));
+								break;
+						}
 					});
 				}else{
-					alert(data['dataSuccess']);
+					if(data['dataSuccess']!= null){
+						$('.notificationS').show();
+						$('.messS').html(data['dataSuccess']);
+						$('.notificationF').hide();
+					}else{
+						$('.notificationF').show();
+						$('.messF').html(data['dataFail']);
+						$('.notificationS').hide();
+					}
+					$('#save').attr('disabled',true);
 				}
 			},
 			error:function(error){
 				$('.mess').html("ERROR!!!");
 			}
-
-
 		}).done(function(){
 			$("#table_Cate").load(' #table_Cate');
 			$("#pageAdd").load(" #pageAdd");
 		});
-
 	});  
+
+	$('#add').click(function(){
+		$(this).attr('disabled',false);
+	})
 	// end add
+
 
 	// start delete
 	$(document).on('click', '.delete_Cate', function(e){
@@ -79,57 +109,87 @@ $(document).ready(function(){
 		}else{
 			return false;
 		}
-
 	});
 
+
 		// start edit
+		$('.notificationES').hide();
+		$('.notificationEF').hide();
 		$(document).on("click",'.editPro', function(){
+			$('#save_Edit_Cate').attr('disabled',false);
 			$('.notification').hide();
+			$('.notificationES').hide();
+			$('.notificationEF').hide();
 			var id = $(this).attr("data-id");
-			console.log(id);
 			$.ajax({
 				url:'/admin/product/editPro/'+id,
 				type:'GET',
 				dataType:'json',
 				data:{},
 				success:function(data){
-					console.log(data);
 					$('#formEdit input[name="name"]').val(data.data['name']);
 					$('#formEdit input[name="status"]').val(data.data['status']);
 					$('#formEdit input[name="price"]').val(data.data['price']);
 					$('#formEdit input[name="quantity"]').val(data['quantity']);
 					$('#formEdit textarea[name="description"]').val(data.data['description']);
-					$('#formEdit select[name="size_id"]').val(data.data['size_id']);
 					$('#formEdit select[name="brand_id"]').val(data.data['brand_id']);
 					$('#formEdit select[name="category_id"]').val(data.data['category_id']);
 				}
 			});
 			$('#save_Edit_Cate').on("click", function(){
-				if(confirm('Bạn có muốn cập nhật?')){
+				$('.mess').html('');
+				$('.11').html('');
+				$('.22').html('');
+				$('.33').html('');
+				$('.44').html('');
+				$('.55').html('');
+				$('.messES').html('');
+				$('.messEF').html('');
 				$.ajax({
 					url:'/admin/product/'+id,
 					type:'PUT',
 					dataType:'json',
 					data:{
+						'id':id,
 						'name':$('#formEdit input[name="name"]').val(),
 						'status':$('#formEdit input[name="status"]').val(),
 						'price':$('#formEdit input[name="price"]').val(),
 						'category_id':$('#formEdit select[name="category_id"]').val(),
 						'brand_id':$('#formEdit select[name="brand_id"]').val(),
-						'size_id':$('#formEdit select[name="size_id"]').val(),
+						'size_id':$('#formEdit select[name="size_id[]"]').val(),
 						'quantity':$('#formEdit input[name="quantity"]').val(),
 						'description':$('#formEdit textarea[name="description"]').val(),
 					},
 					success:function(data){
-						console.log(data);
 						if(data !=undefined && data.errors != undefined){
 							$.each(data.errors,function(key,value){
-								$('.notification').show();
-								$('.mess').append('<p>'+value+'</p>');
+								switch(value.charAt(0)){
+									case '1':$('.11').text(value.slice(2));
+										break;
+									case '2':$('.22').text(value.slice(2));
+											break;
+									case '3':$('.33').text(value.slice(2));
+											break;
+									case '4':$('.44').text(value.slice(2));
+											break;
+									case '5':$('.55').text(value.slice(2));
+										break;
+								
+								}
 							});
 						}else{
-							alert(data['message']);
+							if(data['message']!=null){
+								$('.notificationES').show();
+								$('.messES').html(data['message']);
+								$('.notificationEF').hide();
+							}else{
+								$('.notificationEF').show();
+								$('.messES').html(data['messageFail']);
+								$('.notificationES').hide();
+							}
+							$('#save_Edit_Cate').attr('disabled',true);
 						}
+						
 						$("#table_Cate").load(' #table_Cate');
 					},
 					error:function(error,statusText){
@@ -137,62 +197,72 @@ $(document).ready(function(){
 						
 					}
 				});
-			}
 		});
 
 		$("#close_Edit").on("click", function(){
-			id=null;
+			$('#save_Edit_Cate').attr('disabled',false);
 		});
-
 
 	});
 
 	// start updateQuantity
-	$(document).on('click','.updateQuantity',function(){
+	$('.notificationU').hide();
+	var size_id;
+	$(document).on('click','.updateQuantity',function(e){
+		e.preventDefault();
+		$('#updateQuantity').attr('disabled',false);
+		$('.111').html('');
+		$('.messU').html('');
 		$('.notification').hide();
+		$('.notificationU').hide();
 		var id =$(this).attr("data-id");
-		console.log(id);
+		
 		$.ajax({
 			url:'/admin/product/editPro/'+id,
 			type:'GET',
 			dataType:'json',
 			data:{},
 			success:function(data){
-				console.log(data);
-				$('#formUpdate input[name="name"]').val(data.data['name']);
-				$('#formUpdate input[name="quantity"]').val(data['quantity']);
-				$('#formUpdate select[name="size_id"]').val(data.data['size_id']);
+				// console.log(data);
+				$('#formUpdateQuantity input[name="name"]').val(data.data['name']);
+				$('#formUpdateQuantity input[name="quantity"]').val(data['quantity']);
+				$('#formUpdateQuantity input[name="idPro"]').val(data.data.id);
+				size_id = data['size'];
 			}
 		});
-		$('#updateQuantity').click(function(){
+		
+	});
+
+	$(document).on('click','#updateQuantity',function(){
+			$('.111').html('');
+			$('.messU').html('');
 			if(confirm('Bạn có muốn thêm số lượng?')){
+			var idProduct = $('#formUpdateQuantity input[name="idPro"]').val();
 			$.ajax({
-				url:'/admin/product/updateQuantity/'+id,
-				type:'PUT',
+				url:'/admin/product/updateQuantity',
+				type:'post',
 				dataType:'json',
 				data:{
-					'name':$('#formUpdate input[name="name"]').val(),
-					'quantity':$('#formUpdate input[name="quantity"]').val(),
-					'size_id':$('#formUpdate select[name="size_id"]').val()
-				},
+					'id':idProduct,
+					'quantity':$('#formUpdateQuantity input[name="quantity"]').val(),
+					'size_id':size_id
+				},	
 				success:function(data){
-					console.log(data);
+					// console.log(data);
 					if(data != undefined && data.errors != undefined){
-						$.each(data.errors,function(key,value){
-							$('.notification').hide();
-							$('.mess').append('<p>'+value+'</p>')
-						});
+						// $.each(data.errors,function(key,value){
+						// 	$('.111').text(value);
+						// });
+						$('.111').text(data.errors);
 					}else{
-						alert(data['dataSuccess']);
+						$('.notificationU').show();
+						$('.messU').html(data['dataSuccess']);
+						$('#updateQuantity').attr('disabled',true);
 					}
 				}
 			});
 			}
 		});
-
-
-	});
-
 
 	// start popover
 	$('.hover').popover({
@@ -201,11 +271,10 @@ $(document).ready(function(){
 		trigger:'hover',
 		placement:'right'
 	});
-
 	function fetchData(){
 		var dataShow = "";
 		var id = $(this).attr('productID');
-		console.log(id);
+		// console.log(id);
 		$.ajax({
 			url:'/admin/product/popover/'+id,
 			dataType:'json',
@@ -219,49 +288,48 @@ $(document).ready(function(){
 		return dataShow;
 	}
 
-
-
-		// var blood =  new Bloodhound({
-		// 	remote:{
-		// 		url:'/admin/product/search?value=%QUERY%',
-		// 		wildcard: '%QUERY%'
-		// 	},
-		// 	dataTokenizer: Bloodhound.tokenizers.whitespace('value'),
-		// 	queryTokenizer: Bloodhound.tokenizers.whitespace
-		// });
-		var bloodhound = new Bloodhound({
-                remote: {
-                    url: '/admin/product/search?value=%QUERY%',
-                    wildcard: '%QUERY%'
-                },
-                datumTokenizer: Bloodhound.tokenizers.whitespace('value'),
-    			queryTokenizer: Bloodhound.tokenizers.whitespace
-            });
-
-		$('#search').typeaheader({
-			hint:true,
-			highlight:true,
-			minLenght:1
-		},{
-
-			source: bloodhound.ttAdapter(),
-			name: 'product-search',
-			display: function(data){
-				return data.name;
+	// load product search
+	$(document).on('keyup','#search',function(){
+		var value = $(this).val();
+		$.ajax({
+			url:'/admin/product/searchPoduct',
+			type:'post',
+			dataType:'json',
+			data:{
+				'value':value
 			},
-                templates: {
-                    empty: [
-                        '<div class="list-group search-results-dropdown"><div class="list-group-item">Nothing found.</div></div>'
-                    ],
-                    header: [
-                        '<div class="list-group search-results-dropdown">'
-                    ],
-                    suggestion: function(data) {
-                    return '<div style="font-weight:normal; margin-top:-10px ! important;" class="list-group-item">' + data.name + '</div></div>'
-                    }
-                }
+			success:function(data){
+				console.log(data);
+				$('#searchProduct').fadeIn();
+				$('#table_Cate').html(data);
+			}
 		});
+	});
 
+	// search direct product
+	$(document).on('keyup','#search',function(){
+		var data = $(this).val();
+		$.ajax({
+			url:'/admin/product/searchPoductQuickly',
+			type:'post',
+			dataType:'json',
+			data:{
+				'value':value
+			},
+			success:function(data){
+				console.log(data);
+				$('#searchProduct').fadeIn();
+				$('#searchProduct').html(data);
+				// $('#table_Cate').html(data);
+			}
+		});
+	});
+
+	$(document).on('click','li',function(){
+		$('#search').val($(this).text());
+		$('#searchProduct').fadeOut();
+
+	});
 });
 
 

@@ -53,7 +53,6 @@ class SizeController extends Controller
         }else{
             $result=['datasuccess'=>'Data Already Exists!!!'];
         }  
-        
         return Response()->json($result);
     }
 
@@ -119,7 +118,6 @@ class SizeController extends Controller
     public function destroy($id)
     {
         $size = Size::findOrFail($id);
-        // $product;
         if($size->delete()){
             $product = Product::where('size_id','=',$id);
             $product->delete();

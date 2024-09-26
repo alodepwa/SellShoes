@@ -1,0 +1,27 @@
+#usr{
+	position: relative;
+	margin-right: 20px;
+}
+#usr a{
+	color: black;
+	font: 22px;
+}
+#user span, #user{
+	font-size: 22px;
+}
+#userChild{
+	position: absolute;
+	display: flex;
+	flex-direction: column;
+	visibility: hidden;
+}
+#usr:hover #userChild{
+	visibility: visible;
+}
+
+#userChild li {
+	width: 100px;
+}
+#userChild li:hover {
+	background: #80808026;
+}

@@ -1,0 +1,20 @@
+*{
+	margin: 0px;
+	padding: 0px;
+}
+.anh{
+	display: flex;
+
+}
+.chu{
+	display: flex;
+	flex-direction: column;
+	margin-left: 20px;
+}
+img{
+	width: 150px;
+	height: 150px;
+}
+.chu div{
+	margin-bottom: 10px;
+}

@@ -9,15 +9,13 @@ use Validator;
 class PromotionController extends Controller
 {
 
+    // show infomation promotion
     public function ShowInfoAll($id){
         $promotion=Promotion::find($id);
-        // foreach ($promotion->product as $value) {
-        //    $nameProduct = $value->name;
-        // }
-        // ['data'=>$promotion,'nameProduct'=>$nameProduct]
         return response()->json($promotion);
     }
 
+    // show infomation promotion
     public function ShowInfo($id){
         $promotion =Promotion::findOrFail($id);
         return response()->json($promotion);
@@ -54,31 +52,34 @@ class PromotionController extends Controller
     {
         $validator = Validator::make($request->all(),[
             'name'=>'required',
-            'code'=>'required',
-            'unit'=>'required',
-            'start'=>'required',
-            'end'=>'required',
+            'unit'=>'required|numeric|max:99|min:0',
+            'start'=>'required|date|after:yesterday',
+            'end'=>'required|date|after:start',
             'product_id'=>'required'
         ],[
-            'name.required'=>'Promotion name not null!',
-            'code.required'=>'Code not null!',
-            'unit.required'=>'Unit not null!',
-            'start.required'=>'Start day not null!',
-            'end.required'=>'End day not null!',
+            'name.required'=>'1.Name Promotion không được để trống!',
+            'unit.required'=>'2.Unit  không được để trống!',
+            'unit.numeric'=>'2.Unit phải là số!',
+            'unit.max'=>'2.Unit nhỏ hơn 100',
+            'unit.min'=>'2.Unit lớn hơn 0',
+            'start.required'=>'3.Start Day Promotion không được để trống!',
+            'start.after'=>'3.Start Day Promotion phải sau ngày hôm qua!',
+            'end.required'=>'4.End Day Promotion không được để trống!',
+            'end.after'=>'4.End Day Promotion phải sau Start Day!',
             'product_id.required'=>'Product_id not null!',
         ]);
         if($validator->fails()){
             return response()->json(['errors'=>$validator->errors()->all()]);
-        }else{
+        }
+        else{
             $data = $request->all();
-            $productId = Promotion::Where('product_id','=',$request->get('product_id'))->where('name','=',$request->get('name'))->first();
+            $productId = Promotion::Where('product_id','=',$request->get('product_id'))->first();
             if(!empty($productId)){
-                $result = ['dataSuccess'=>'Product ID Already Exists!'];
+                $result = ['dataFail'=>'Product ID Already Exists!'];
             }else{
                 $promotion = Promotion::create($data);
                 $result = ['dataSuccess'=>'Promotion Create Success!'];
             }
-           
             return response()->json($result);
         }
         
@@ -117,18 +118,21 @@ class PromotionController extends Controller
     public function update(Request $request,$id)
     {
          $validator = Validator::make($request->all(),[
-            'name'=>'required',
-            'code'=>'required',
-            'unit'=>'required',
-            'start'=>'required',
-            'end'=>'required',
+            'name'=>'required|unique:promotions,name,'.$id,
+            'unit'=>'required|numeric|min:0|max:99',
+            'start'=>'required|date|after:yesterday',
+            'end'=>'required|date|after:start',
             'product_id'=>'required'
         ],[
-            'name.required'=>'Promotion name not null!',
-            'code.required'=>'Code not null!',
-            'unit.required'=>'Unit not null!',
-            'start.required'=>'Start day not null!',
-            'end.required'=>'End day not null!',
+            'name.required'=>'1.Name Promotion không được để trống!',
+            'unit.required'=>'2.Unit  không được để trống!',
+            'unit.numeric'=>'2.Unit phải là số!',
+            'unit.max'=>'2.Unit nhỏ hơn 100',
+            'unit.min'=>'2.Unit lớn hơn 0',
+            'start.required'=>'3.Start Day Promotion không được để trống!',
+            'start.after'=>'3.Start Day Promotion phải sau ngày hôm qua!',
+            'end.required'=>'4.End Day Promotion không được để trống!',
+            'end.after'=>'4.End Day Promotion phải sau Start Day!',
             'product_id.required'=>'Product_id not null!',
         ]);
         if($validator->fails()){
@@ -136,18 +140,16 @@ class PromotionController extends Controller
         }else{
             $promotion = Promotion::findOrFail($id);
             $data=$request->all();
-            $check = Promotion::where('name','=',$request->get('name'))->where('product_id','<>',$id)->first();
-            if(empty($check)){
+            // $check = Promotion::where('name','=',$request->get('name'))->where('product_id','<>',$id)->first();
+            // if(empty($check)){
                 if($promotion->update($data)){
                     $result = ['message'=>"Update Success!"];
                 }else{
-                     $result = ['message'=>"Update False!"];
+                     $result = ['messageFail'=>"Update False!"];
                 }
-            }else{
-                 $result = ['message'=>"Promotion Already Exists!"];
-            }
-            
-
+            // }else{
+            //      $result = ['message'=>"Promotion Already Exists!"];
+            // }
             return response()->json($result);
         }
         
@@ -167,9 +169,6 @@ class PromotionController extends Controller
         }else{
              $result = ['message'=>"Delete Promotion False!!!"];
         }
-       
-        
-        
         return response()->json($result);
     }
 }

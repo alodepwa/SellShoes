@@ -15,6 +15,6 @@ class Size extends Model
     ];
 
     public function products(){
-    	return $this->belongsToMany('App\Product','product_sizes','size_id','product_id')->withPivot('quantity');
+    	return $this->belongsToMany('App\Product','product_sizes','size_id','product_id')->withPivot('quantity')->withTimestamps();;
     }
 }

@@ -41,7 +41,6 @@ class UserController extends Controller
      */
     public function store(CreateUserRequest $request)
     {
-        // $data = $request->validated();
         $data = $request->all();
         $email =User::where('email','=',$request->only('email')['email'])->first();
         if(!$email){
@@ -109,22 +108,4 @@ class UserController extends Controller
         }
     }
 
-    public function search(Request $request){
-        $user = $request->get('search');
-        // dd($user);
-        $value = User::where('name','LIKE','%'.$user.'%')->orWhere('email','like','%'.$user.'%')->get();
-        if($value){
-            $result = [
-                'data'=>$value,
-                'status'=>200
-            ];
-        }else{
-              $result = [
-                'data'=>"không tìm thấy kết quả",
-                'status'=>200
-            ];
-        }
-
-        return response()->json($result);
-    }
 }

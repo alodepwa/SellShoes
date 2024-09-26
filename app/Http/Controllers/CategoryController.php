@@ -15,10 +15,8 @@ class CategoryController extends Controller
      */
     public function index()
     {
-
         $listCate = Category::all();
         $page = Category::orderBy('id','DESC')->paginate(7);
-        
         return view('admin.listCategory',compact('listCate','page'));
     }
 
@@ -56,7 +54,7 @@ class CategoryController extends Controller
                 $cate = Category::create($data);
                 $result = ['dataSuccess'=>'Create Category Success!'];
             }else{
-                $result=['dataSuccess'=>"Category Already Exists!"];
+                $result=['dataFail'=>"Category Already Exists!"];
             }
             
             return response()->json($result);

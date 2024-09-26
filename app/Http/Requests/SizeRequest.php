@@ -24,13 +24,20 @@ class SizeRequest extends FormRequest
     public function rules()
     {
         return [
-            'name'=>'required'
+            'name'=>'required',
+            'email'=>'required|email',
+            'password'=>'required|min:6|max:12'
         ];
     }
 
     public function messages(){
         return [
-            'name.required'=>'Trường này không được để trống!'
+            'name.required'=>"Name không được để trống!",
+            'email.required'=>"Email không được để trống!",
+            'password.required'=>"Password không được để trống!",
+            'email.email'=>"Cần nhập vào là email!",
+            'password.min'=>"Password cần ít nhất 6 kí tự!",
+            'password.max'=>"Password nhiều nhất 12 kí tự!"
         ];
     }
 }

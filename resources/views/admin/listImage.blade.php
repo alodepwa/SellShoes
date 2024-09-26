@@ -9,8 +9,7 @@
 <script src="/js/app.js"></script>
 <script src="/js/images.js"></script>
 
-
-<script type="text/javascript" src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
+<!-- <script type="text/javascript" src="http://code.jquery.com/jquery-1.7.1.min.js"></script> -->
 <link rel="stylesheet" href="/css/admin.css">
 @endsection
 
@@ -41,7 +40,8 @@
             <thead>
                 <tr>
                     <th>#</th>
-                    <th>Name</th>
+                    <th>Product ID</th>
+                    <th>Name Product</th>
                     <th>Images</th>
                     <th>Action</th>
                 </tr>
@@ -50,11 +50,12 @@
                 @foreach($image as $value)
 					<tr>
 						<td width="10%">{{$value->id}}</td>
+						<td width="15%">{{$value->product_id}}</td>
 						<td width="20%">{{$value->name}}</td>
-						<td width="40%">{{$value['image']}}</td>
+						<td width="25%"><img src='{{asset("/upImage/$value->path")}}' width="50px" height="50px" alt=""></td>
 						<td width="30%">
 							<a class="btn btn-danger delete_Cate" data-id="{{$value->id}}">Delete</a>
-							 <a href=""  data-id="{{$value->id}}" data-name="{{$value->name}}" data-target="#myModal2" data-toggle="modal" class="btn btn-info rounded-pill edit_Cate">Edit</a>
+							 <a href=""  data-id="{{$value->id}}" data-target="#myModal2" data-toggle="modal" class="btn btn-info rounded-pill edit_Cate">Edit</a>
 						</td>
 					</tr>
                 @endforeach
@@ -78,7 +79,7 @@
 			<div class="modal-header">
 				<div class="container">
 					<div class="row">
-						<div class="container "><h4 class="modal-title">Create Size</h4></div>
+						<div class="container "><h4 class="modal-title">Create Image</h4></div>
 					</div>
 						<div class="row notification">
 							<div class="container-fluid">
@@ -93,22 +94,27 @@
 					@csrf
 					<fieldset class="form-group">
 						<label for="formGroupExampleInput">Image Name<small>*</small></label>
+						<br>
+						<label for="" class="1 text-danger"></label>
 						<input type="text" name="name" class="form-control" id="formGroupExampleInput" placeholder="Category Name...">
-					</fieldset>
-					<fieldset class="form-group">
-						<input type="file" name="image" id="formGroupExampleInput" placeholder="Category Name...">
 					</fieldset>
 					<fieldset class="form-group">
 						<label for="formGroupExampleInput">Product Name<small>*</small></label>
 						<select name="product_id" id=""class="form-control">
-							<option value=""></option>
+							@foreach($product as $value)
+								<option value="{{$value->id}}">{{$value->name}}</option>
+							@endforeach
 						</select>
+					</fieldset>
+					<fieldset class="form-group mt-2">
+						<label for="" class="2 text-danger"></label>
+						<input type="file" name="image" id="image" placeholder="Category Name...">
 					</fieldset>
 				</form>
 			</div>
 			<div class="modal-footer">
 				<button type="button" class="btn btn-primary" id="save">Add</button>
-				<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+				<button type="button" class="btn btn-secondary" id="close" data-dismiss="modal">Close</button>
 				
 			</div>
 		</div><!-- /.modal-content -->
@@ -125,27 +131,41 @@
 			<div class="modal-header">
 				<div class="container">
 					<div class="row">
-						<div class="container "><h4 class="modal-title">Edit Size</h4></div>
+						<div class="container "><h4 class="modal-title">Edit Image</h4></div>
 					</div>
 						<div class="row notificationS">
 							<div class="container-fluid">
 								<div class="alert alert-success messS"></div>
 							</div>
 						</div>
-						<div class="row notificationE">
+						<div class="row notificationF">
 							<div class="container-fluid">
-								<div class="alert alert-danger messE"></div>
+								<div class="alert alert-danger messF"></div>
 							</div>
 						</div>
 				</div>
 				
 			</div>
 			<div class="modal-body">
-				<form id="form_edit">
+				<form method="post" id="editImage" >
 					@csrf
 					<fieldset class="form-group">
-						<label for="name">Brand Name <small>*</small></label>
-						<input type="text" name="name" id="ediCate" class="form-control" value="">
+						<label for="formGroupExampleInput">Image Name<small>*</small></label>
+						<br>
+						<label for="" class="11 text-danger"></label>
+						<input type="text" name="name" class="form-control" id="formGroupExampleInput" placeholder="Category Name...">
+					</fieldset>
+					<fieldset class="form-group">
+						<label for="formGroupExampleInput">Product Name<small>*</small></label>
+						<select name="product_id" id=""class="form-control">
+							@foreach($product as $value)
+								<option value="{{$value->id}}">{{$value->name}}</option>
+							@endforeach
+						</select>
+					</fieldset>
+					<fieldset class="form-group mt-2">
+						<label for="" class="22 text-danger"></label>
+						<input type="file" name="image" id="img" placeholder="Category Name...">
 					</fieldset>
 				</form>
 			</div>

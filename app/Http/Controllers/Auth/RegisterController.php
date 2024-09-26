@@ -7,7 +7,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Foundation\Auth\RegistersUsers;
-
+use Illuminate\Http\Request;
 class RegisterController extends Controller
 {
     /*
@@ -52,6 +52,7 @@ class RegisterController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'role_id'=>['required','integer','min:1','max:1'],
         ]);
     }
 
@@ -66,7 +67,25 @@ class RegisterController extends Controller
         return User::create([
             'name' => $data['name'],
             'email' => $data['email'],
-            'password' => Hash::make($data['password']),
+            'password' => bcrypt($data['password']),
+            'role_id'=>1
         ]);
+    }
+
+    public function register(Request $request)
+    {
+            Validator::make($request->all(),[
+            'name' => 'required|string|max:255',
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+
+        ]);
+
+        $data = $request->except('_token','password_confirmation');
+        $data['password']=bcrypt($data['password']);
+        $data['role_id']=1;
+        $user=User::create($data);
+        $this->guard()->login($user);
+        return redirect()->route('homeAdmin');
     }
 }

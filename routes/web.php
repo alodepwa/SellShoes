@@ -1,38 +1,18 @@
 <?php
-
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group which
-| contains the "web" middleware group. Now create something great!
-|
-*/
-
-// Route::get('/', function () {
-//     return view('welcome');
-// });
-
-
 // admin 
 
-Route::group(['prefix'=>'admin'],function(){
+Route::group(['prefix'=>'admin','middleware'=>['checkLogin','checkAdmin','web']],function(){
 
 	Route::get('/home',function(){
 		return view('admin.home');
-	});
+	})->name('homeAdmin');
 
 	Route::get('orderList',function(){
 		return view('admin.orderList');
 	})->name('OrderList');
 
-
 	// user
 	Route::resource('user','UserController');
-	Route::post('/user/search','UserController@search')->name('search');
-
 
 	//category
 	Route::resource('category','CategoryController');
@@ -56,8 +36,98 @@ Route::group(['prefix'=>'admin'],function(){
 	Route::get('product/editPro/{id}','ProductController@ShowInfo');
 	Route::get('product/popover/{id}','ProductController@ShowPopover');
 	Route::get('product/search','ProductController@Search');
-	Route::PUT('/product/updateQuantity/{id}','ProductController@UpdateQuantity');
+	Route::post('product/updateQuantity','ProductController@UpdateQuantity');
+	Route::post('product/searchPoduct','ProductController@SearchProduct');
+	Route::post('product/searchPoductQuickly','ProductController@SearchProductQuickly');
+	// Route::post('product/capnhat','ProductController@capnhat');	
 
 	//images
 	Route::resource('image','ImageController');
+	Route::get('image/show/{id}','ImageController@ShowInfo');
+	Route::post('image/upload/{id}','ImageController@UpLoadImage');
+
+	//comments
+	Route::resource('comments','CommentController');
+	Route::post('comments/approve','CommentController@read');
+
+	//order
+	Route::resource('orders','OrderController');
+	Route::post('orders/list','OrderController@loadListOrder');
+	Route::post('order/yes','OrderController@approveOrder');
+	Route::post('order/no','OrderController@dissOrder');
 });
+
+
+
+
+	// view login user
+	Route::get('login','LoginController@index')->name('formLogin');
+
+	//logout user
+	Route::get('logout','LoginController@logout')->name('logout');
+
+	// send data from form login
+	Route::post('login','LoginController@login')->name('login');
+
+
+	Route::post('loginUser','LoginController@loginUser')->name('loginUser');
+
+	//view register user
+	Route::get('register','LoginController@create')->name('register');
+
+	// send data from form register 
+	Route::post('register','LoginController@store')->name('registerUser');
+
+	// view home user
+	Route::resource('user/page','LoadPageController');
+
+	// send data search from users
+	Route::post('user/search','LoadPageController@search');
+
+	// search category
+	Route::post('user/searchCategory','LoadPageController@searchCategory');
+
+	// search size
+	Route::get('user/searchSize/{id}','LoadPageController@searchSize');
+
+	// view detail product not login
+	Route::get('user/view/{id}','LoadPageController@view')->name('view');
+
+	// view details product need login
+	Route::get('user/showDetail/{id}','LoadPageController@showDetail')->name('showDetail');
+
+	//filter prices product
+	Route::post('user/filterPrice','filterPriceController@filterPrice');
+
+
+
+
+Route::group(['prefix'=>'user','middleware'=>['web','checkLogin']],function(){
+
+	// change price when change quantity at view order product
+	Route::post('showPrice','LoadPageController@showPrice');
+
+	// shopping cart
+	Route::post('cartShopping','LoadPageController@cartShopping')->name('shopDetail');
+
+	// details product shopping cart
+	Route::get('cartDetail','LoadPageController@cartDetail')->name('cartDetail');
+
+	// delete product in cart shopping
+	Route::post('cartDetail','LoadPageController@deleteCart')->name('deleteCart');
+
+	// send data from cart to checkout
+	Route::post('checkout','LoadPageController@checkout')->name('checkout');
+
+	// send data from user to admin
+	Route::post('order','LoadPageController@order');
+
+	// view management order
+	Route::resource('mngOrders','ManagementOrderController');
+
+	Route::post('cancelOrder','ManagementOrderController@cancelOrder')->name('cancelOrder');
+	Route::get('comment/{id}{id2}','CommentController@comment')->name('comment');
+	Route::post('comment','CommentController@commentPost')->name('commentPost');
+	Route::get('detailsComments/{id}','CommentController@detailsComment')->name('detailsComment');
+});
+

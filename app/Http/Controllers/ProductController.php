@@ -11,26 +11,106 @@ use Validator;
 
 class ProductController extends Controller
 {
+    // search product with direction
+    public function SearchProductQuickly(Request $request){
+        $value = $request->get('value');
+        $out="";
+        if(!empty($value)){
+            $product = Product::where('name','like','%'.$value.'%')->orWhere('status','like','%'.$value.'%')->orWhere('price','like','%'.$value.'%')->get();
+            $out='<ul class="dropdown-menu fluid" width="100%" style="display:block;position:relative">';
+            $count = count($product);
+            if($count>=1){
+                foreach ($product as $dl) {
+                    $out.='<li width="500px"><a href="#">'.$dl["name"].'</a></li>';
+                }
+                $out.='</ul>';
+            }
+        }
+        return response()->json($out);
+    }
 
+    // search product with name product price(admin)
+    public function SearchProduct(Request $request){
+        $value = $request->get('value');
+        if(!empty($value)){
+            $product = Product::where('name','like','%'.$value.'%')->orWhere('status','like','%'.$value.'%')->orWhere('price','like','%'.$value.'%')->get();
+        }else{
+            $product= $product=Product::orderBy('id','DESC')->paginate(7);
+        }
+        $count = count($product);
+        $outTable='';
+        if($count>=1){
+            $outTable="
+                 <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Name</th>
+                    <th>Size</th>
+                    <th>Price</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>";
+            foreach ($product as $key=> $dl) {
+                foreach ($dl->sizes as $key => $value) {
+                    $size = $value->name;
+                }
+                $outTable.="<tr>";
+                $outTable.= '<td width="10%">'.$dl["id"].'</td>';
+                $outTable.= '<td width="20%%"><a class="hover" productID="'.$dl["id"].'">'.$dl['name'].'</a></td>';
+               $outTable.='<td width="20%"><a class="hover" productID="'.$dl['id'].'">
+                           '.$size.'
+                        </a></td>';
+                $outTable.= '<td width="20%"><a class="hover" productID="'.$dl["id"].'">'.$dl['price'].'</a></td>';
+                $outTable.= '<td width="30%">
+                            <a class="btn btn-danger delete_Cate" data-id="'.$dl["id"].'">Delete</a>
+                             <a href=""  data-id="'.$dl["id"].'" data-target="#myModal2" data-toggle="modal" class="btn btn-info rounded-pill editPro">Edit</a>
+                             <a class="btn btn-success updateQuantity" data-target="#myModal3" data-toggle="modal" data-id="'.$dl["id"].'">Quantity</a>
+                        </td>';
+                $outTable.="</tr>";
+            }
+        }
+        $outTable.="</tbody>";
+        return response()->json($outTable);
+    }
+
+    // search name product in admin
     public function Search(Request $request){
         $product = Product::where('name','LIKE','%'.$request->name.'%')->get();
         return response()->json($product);
     }
 
+
+    // show popover
     public function ShowPopover($id){
         $info = Product::find($id);
         foreach ($info->sizes as $value) {
             $quantity = $value->pivot->quantity;
         }
+        $img = $info->images()->first();
+        $infoImg = $img->path;
         $brand=$info->brand();
-        $out ='<p><lable>Category: '.$info->category->name.'</label></p>
-         <p><lable>Brand: '.$info->brand->name.'</label></p>
-          <p><lable>Quantity: '.$quantity.'</label></p>
-         <p><lable>Description: '.$info->description.'</label></p>';
+        if(!empty($infoImg)){
+            $out='<p><lable><img src="/upImage/'.$infoImg.'" width="100px"height="100px" alt=""></label></p>
+                <p><lable>Category: '.$info->category->name.'</label></p>
+                <p><lable>Brand: '.$info->brand->name.'</label></p>
+                <p><lable>Quantity: '.$quantity.'</label></p>
+                <p><lable>Description: '.$info->description.'</label></p>';
+        }
+        if(empty($infoImg)){
+            $out='<p><lable>Category: '.$info->category->name.'</label></p>
+                <p><lable>Brand: '.$info->brand->name.'</label></p>
+                <p><lable>Quantity: '.$quantity.'</label></p>
+                <p><lable>Description: '.$info->description.'</label></p>';
+        }
         return Response()->json($out);
+        
     }
 
-    public function UpdateQuantity(Request $request,$id){
+    // update quantity with size and id product
+    public function UpdateQuantity(Request $request){
+        $id = $request->get('id');
+        $size_id = $request->get('size_id');
         $validator=Validator::make($request->all(),[
             'quantity'=>'required|numeric'
         ],
@@ -43,13 +123,16 @@ class ProductController extends Controller
         }else{
             $info=Product::findOrFail($id);
             $data = $request->get('quantity');
-            $size_id = $request->get('size_id');
             foreach ($info->sizes as $value) {
                 $old = $value->pivot->quantity;
+                $size[]= $value->id;
             }
             $quantity = $old+$data;
             if($info){
-                $info->sizes()->sync([$size_id=>['quantity'=>$quantity]]);
+                foreach ($size_id as $key => $value) {
+                   $size[$value]=['quantity'=>$quantity];
+                }
+                $info->sizes()->sync($size);
                 $result=['dataSuccess'=>'Update Quantity Success!'];
             }else{
                  $result=['dataSuccess'=>'Update Quantity False!'];
@@ -58,13 +141,14 @@ class ProductController extends Controller
         }
     }
 
+
     public function ShowInfo($id){
         $info = Product::find($id);
-        // $size_id = Product::only('size_id');
        foreach ($info->sizes as $value) {
           $quantity = $value->pivot->quantity;
+            $size[] = $value->id;
        }
-        return Response()->json(['data'=>$info,'quantity'=>$quantity]);
+        return response()->json(['data'=>$info,'quantity'=>$quantity,'size'=>$size]);
     }
     /**
      * Display a listing of the resource.
@@ -98,37 +182,46 @@ class ProductController extends Controller
      */
     public function store(Request $request)
     {
-        $data = $request->except('quantity');
+        $data = $request->except('quantity','size_id');
         $quantity = $request->get('quantity');
-        $size_id = $request->get('size_id');
+        $size_id= $request->get('size_id');
 
         $validator = Validator::make($request->all(),[
             'name'=>'required',
             'price'=>'required|numeric',
             'description'=>'required',
-            'quantity'=>'required|numeric'
+            'quantity'=>'required|numeric',
+            'brand_id'=>'required',
+            'size_id'=>'required',
+            'category_id'=>'required'
         ],[
-            'name.required'=>'Tên sản phẩm không được để trống!',
-            'quantity.required'=>'Số lượng sản phẩm không được để trống!',
-            'price.numeric'=>'Giá sản phẩm cần nhập là số!',
-            'price.required'=>'Giá sản phẩm không được để trống!',
-            'description.required'=>'Mô tả sản phẩm không được để trống!'
+            'name.required'=>'1.Tên sản phẩm không được để trống!',
+            'quantity.required'=>'2.Số lượng sản phẩm không được để trống!',
+            'price.numeric'=>'3.Giá sản phẩm cần nhập là số!',
+            'price.required'=>'3.Giá sản phẩm không được để trống!',
+            'description.required'=>'4.Mô tả sản phẩm không được để trống!',
+            'brand_id.required'=>'Brand không được để trống!',
+            'size_id.required'=>'5.Size sản phẩm không được để trống!',
+            'category_id.required'=>'Category sản phẩm không được để trống!',
         ]);
 
         if($validator->fails()){
             return response()->json(['errors'=>$validator->errors()->all()]);
         }else{
-            $check = Product::where('name','=',$request->get('name'))->where('size_id','=',$size_id)->first();
-            if(empty($check)){
-                Product::create($data)->sizes()->sync([$size_id=>['quantity'=>$quantity]]);
+            $check = Product::where('name','=',$request->get('name'))->first();
+            if(!$check){
+                foreach ($size_id as $key => $value) {
+                    $size[$value]= ['quantity'=>$quantity];
+                }
+                // $data['name']=htmlspecialchars($request->get('name'));
+                Product::create($data)->sizes()->sync($size); 
                 $result = ['dataSuccess'=>'Create Product Success!!!'];
             }else{
-                $result = ['dataSuccess'=>'Product Already Exists!!!'];
+                $result = ['dataFail'=>'Product Already Exists!!!'];
             }
             return Response()->json($result);
         }
 
-        
     }
 
     /**
@@ -166,14 +259,20 @@ class ProductController extends Controller
             'name'=>'required',
             'price'=>'required|numeric',
             'description'=>'required',
-            'quantity'=>'required|numeric'
-
+            'quantity'=>'required|numeric',
+            'brand_id'=>'required',
+            'size_id'=>'required',
+            'category_id'=>'required'
         ],
         [
-            'name.required'=>'Tên sản phẩm không được để trống!',
-            'price.required'=>'Giá sản phẩm không được để trống!',
-            'description.required'=>"Mô tả sản phẩm không được để trống!",
-            'quantity.required'=>'Giá sản phẩm không được để trống!'
+            'name.required'=>'1.Tên sản phẩm không được để trống!',
+            'quantity.required'=>'2.Số lượng sản phẩm không được để trống!',
+            'price.numeric'=>'3.Giá sản phẩm cần nhập là số!',
+            'price.required'=>'3.Giá sản phẩm không được để trống!',
+            'description.required'=>'4.Mô tả sản phẩm không được để trống!',
+            'brand_id.required'=>'Brand không được để trống!',
+            'size_id.required'=>'5.Size sản phẩm không được để trống!',
+            'category_id.required'=>'Category sản phẩm không được để trống!',
         ]);
 
         if($validator->fails()){
@@ -183,16 +282,17 @@ class ProductController extends Controller
             $product = Product::findOrFail($id);
             $size_id = $request->get('size_id');
             $quantity = $request->get('quantity');
+            foreach ($size_id as $key => $value) {
+                $size[$value]=['quantity'=>$quantity];
+            }
             if($product->update($data)){
-                $product->sizes()->sync([$size_id=>['quantity'=>$quantity]]);
+                $product->sizes()->sync($size);
                 $result=["message"=>'Update Success!!!'];
             }else{
-                $result=["message"=>'Update False!!!'];
+                $result=["messageFail"=>'Update False!!!'];
             }
             return Response()->json($result);
         }
-       
-        
     }
 
     /**
@@ -208,8 +308,11 @@ class ProductController extends Controller
             $product->promotion()->delete();
             $product->sizes()->detach();
             $product->promotion()->delete();
+            $product->userComments()->detach();
+            $product->images()->delete();
             $result=['message'=>'Delete Success!!!'];
         }
         return Response()->json($result);
     }
+
 }

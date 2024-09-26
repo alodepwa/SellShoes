@@ -8,44 +8,71 @@ $(document).ready(function(){
 		}
 	});
 
-	$('.notification').hide();
+	$('.notificationS').hide();
+	$('.notificationF').hide();
 
 	// start add promotion
 	$('#save').click(function(e){
 		e.preventDefault();
-		$('.notification').show();
-		$.ajax({
-			url:'/admin/promotion',
-			type:"POST",
-			dataType:'json',
-			data:{
-				'name':$('#addPromotion input[name="name"]').val(),
-				'code':$('#addPromotion input[name="code"]').val(),
-				'unit':$('#addPromotion input[name="unit"]').val(),
-				'end':$('#addPromotion input[name="end"]').val(),
-				'start':$('#addPromotion input[name="start"]').val(),
-				'product_id':$('#addPromotion select[name="product_id"]').val(),
-			},
-			success:function(data){
-				console.log(data);
-				if(data != undefined && data.errors != undefined){
-					$.each(data.errors,function(key,value){
-						$('.notification').show();
-						$('.mess').append(value+'<br>');
-					});
-				}else{
-					$('.notification').hide();
-					alert(data['dataSuccess']);
-					$("#table_Cate").load(' #table_Cate');
-			$("#pageAdd").load(" #pageAdd");
+		$('.mess').html('');
+		// $('.notification').show();
+		$('.1').html('');
+		$('.2').html('');
+		$('.3').html('');
+		$('.4').html('');
+		var unit = $('#addPromotion input[name="unit"]').val();
+		
+			$.ajax({
+				url:'/admin/promotion',
+				type:"POST",
+				dataType:'json',
+				data:{
+					'name':$('#addPromotion input[name="name"]').val(),
+					'unit':unit,
+					'end':$('#addPromotion input[name="end"]').val(),
+					'start':$('#addPromotion input[name="start"]').val(),
+					'product_id':$('#addPromotion select[name="product_id"]').val(),
+				},
+				success:function(data){
+					console.log(data);
+					if(data != undefined && data.errors != undefined){
+						$.each(data.errors,function(key,value){
+							switch(value.charAt(0)){
+								case '1':$('.1').text(value.slice(2));
+									break;
+								case '2':$('.2').text(value.slice(2));
+										break;
+								case '3':$('.3').text(value.slice(2));
+										break;
+								case '4':$('.4').text(value.slice(2));
+										break;
+							}
+							
+						});
+					}else{
+						if(data['dataSuccess']!=null){
+							$('.notificationS').show();
+							$('.mess').html(data['dataSuccess']);
+							$('.notificationF').hide();
+						}else{
+							$('.notificationF').show();
+							$('.messF').html(data['dataFail']);
+							$('.notificationS').hide();
+						}
+						$("#table_Cate").load(' #table_Cate');
+						$("#pageAdd").load(" #pageAdd");
+					}
+				},
+				error:function(error){
+					$('.mess').html("ERROR!!!");
 				}
-			},
-			error:function(error){
-				$('.mess').html("ERROR!!!");
-			}
-		});
-
+			});
 	});  
+
+	$(document).on('click','#add',function(){
+		$('.notificationF').hide();
+		$('.notificationS').hide();
+	});
 	// end add
 
 
@@ -69,7 +96,6 @@ $(document).ready(function(){
 					$("#pageAdd").load(" #pageAdd");
 				},
 				error:function(error){
-					// $('.mess').html(error);
 					alert("ERROR!!!");
 				}
 			});
@@ -78,14 +104,15 @@ $(document).ready(function(){
 			id=null;
 			console.log("id"+id);
 		};
-
-
-
 	});
 
-		// start update promotion
+	// start update promotion
+	$('.notificationES').hide();
+	$('.notificationEF').hide();
 	$(document).on('click','.edit_Cate', function(){
-
+		$('.notificationES').hide();
+		$('.notificationEF').hide();
+		$('#saveEditPromotion').attr('disabled',false);
 		var id = $(this).attr("data-id");
 		console.log(id);
 		var name = $(this).attr("data-name");
@@ -96,7 +123,6 @@ $(document).ready(function(){
 			data:{},
 			success:function(data){
 				$('#editPromotion input[name="name"]').val(data['name']);
-				$('#editPromotion input[name="code"]').val(data['code']);
 				$('#editPromotion input[name="unit"]').val(data['unit']);
 				$('#editPromotion input[name="start"]').val(data['start']);
 				$('#editPromotion input[name="end"]').val(data['end']);
@@ -104,11 +130,11 @@ $(document).ready(function(){
 			}
 		});
 
-
-
-
-
 		$('#saveEditPromotion').on("click", function(){
+			$('.11').html('');
+			$('.22').html('');
+			$('.33').html('');
+			$('.44').html('');
 			$.ajax({
 				url:'/admin/promotion/'+id,
 				type:'PUT',
@@ -124,19 +150,34 @@ $(document).ready(function(){
 				success:function(data){
 					if(data !=undefined && data.errors !=undefined){
 						$.each(data.errors, function(key,value){
-							$('.notification').show();
-							$('.mess').append(value+'<br>');
+							switch(value.charAt(0)){
+								case '1':$('.11').text(value.slice(2));
+									break;
+								case '2':$('.22').text(value.slice(2));
+										break;
+								case '3':$('.33').text(value.slice(2));
+										break;
+								case '4':$('.44').text(value.slice(2));
+										break;
+							}
 						});
 					}
 					else{
-						alert(data['message']);
+						if(data['message']!=null){
+							$('.notificationES').show();
+							$('.messES').html(data['message']);
+							$('notificationEF').hide();
+							$('#saveEditPromotion').attr('disabled','disabled');
+						}else{
+							$('.notificationEF').show();
+							$('.messEF').html(data['messageFail']);
+							$('notificationES').hide();
+						}
 						$("#table_Cate").load(' #table_Cate');
 					}
 				}
 			});
-
 		});
-
 	});
 
 
@@ -146,7 +187,6 @@ $(document).ready(function(){
 		html:true,
 		trigger:'hover',
 		placement:'right'
-
 	});
 	function ShowInfo(){
 		var dataShow ="";
@@ -167,7 +207,4 @@ $(document).ready(function(){
 		});
 		return dataShow;
 	}
-
-	
-
 });

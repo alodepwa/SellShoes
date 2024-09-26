@@ -5,9 +5,44 @@ namespace App\Http\Controllers;
 use App\Image;
 use App\Product;
 use Illuminate\Http\Request;
+use Validator;
 
 class ImageController extends Controller
-{
+{   
+    // start upload image
+    public function UpLoadImage(Request $request,$id){
+           $validator = Validator::make($request->all(),[
+            'name'=>'required',
+            'image'=>'required|mimes:jpg,png,jpeg'
+        ],[
+            'name.required'=>'1.Tên ảnh không được để trống!',
+            'image.required'=>'2.File ảnh không được để trống!',
+            'image.mimes'=>'2.Đuôi ảnh không đúng định dạng!'
+        ]);
+
+        if($validator->fails()){
+            return Response()->json(['errors'=>$validator->errors()->all()]);
+        }else{
+            $image = Image::findOrFail($id);
+            $name = $request->get('name');
+            $product_id = $request->get('product_id');
+            $img =$request->file('image')->getClientOriginalExtension();
+            $nameImage = time().'_'.$name.'.'.$img;
+            $data =['name'=>$name,'path'=>$nameImage,'product_id'=>$product_id];
+            $upload = $request->file('image')->move('upImage',$nameImage);
+            if($image->update($data)){
+                $result =['dataSuccess'=>"Cập nhật thành công!"];
+            }else{
+                $result =['dataFail'=>"Cập nhật thất bại!"];
+            }
+            return Response()->json($result);
+        }
+    }
+
+    public function ShowInfo($id){
+        $img = Image::find($id);
+        return response()->json($img);
+    }
     /**
      * Display a listing of the resource.
      *
@@ -37,10 +72,28 @@ class ImageController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
-    {
-        $data =$request->file('image');
-       
-        return Response()->json($data);
+    {   
+        $validator = Validator::make($request->all(),[
+            'name'=>'required',
+            'image'=>'required|mimes:jpg,png,jpeg',
+        ],[
+            'name.required'=>'1.Tên ảnh không được để trống!',
+            'image.required'=>'2.File ảnh không được để trống!',
+            'image.mimes'=>'2.Đuôi ảnh không đúng định dạng!'
+           
+        ]);
+        if($validator->fails()){
+            return Response()->json(['errors'=>$validator->errors()->all()]);
+        }else{
+            $name = $request->get('name');
+            $product_id = $request->get('product_id');
+            $img =$request->file('image')->getClientOriginalExtension();
+            $nameImage = time().'_'.$name.'.'.$img;
+            $data =['name'=>$name,'path'=>$nameImage,'product_id'=>$product_id];
+            $upload = $request->file('image')->move('upImage',$nameImage);
+            Image::create($data)? $result =['dataSuccess'=>"Thêm mới thành công!"]: $result =['dataSuccess'=>"Thêm mới thất bại!"];
+            return Response()->json($result);
+        }
     }
 
     /**
@@ -83,8 +136,10 @@ class ImageController extends Controller
      * @param  \App\Image  $image
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Image $image)
+    public function destroy(Request $request,$id)
     {
-        //
+        $img = Image::findOrFail($id);
+        $img->delete()? $result =['dataSuccess'=>"Xóa thành công!"]: $result =['dataSuccess'=>"Xóa thất bại!"];
+        return Response()->json($result);
     }
 }

@@ -26,7 +26,6 @@ $(document).ready(function(){
 					'role_id':$('.createUser select[name="role_id"]').val(),
 					'gender':$('.createUser input[name="gender"]').val(),
 					'dayofbirth':$('.createUser input[name="dayofbirth"]').val()
-
 				},
 				success:function(data){
 
@@ -53,11 +52,6 @@ $(document).ready(function(){
 		});
 
 	});
-
-
-	//list user
-
-
 });
 
 $(document).ready(function(){
@@ -71,7 +65,6 @@ $(document).ready(function(){
 
  	$(document).on('click','.deleteUser',function(e){
 			e.preventDefault();
-			
 			var urlDelete = $(this).attr("data-url");
 			console.log(urlDelete);
 			var id = $(this).attr("data");
@@ -83,20 +76,12 @@ $(document).ready(function(){
 					data:{
 					},
 					success:function(data){
-						console.log('success');
-						console.log(data);
 						alert(data.message);
-						// $('#tableUser').DataTable().ajax.reload();
-						var number=data.data[0]['countUser'];
-						var showNumber = "<p >"+number+"</p>"
-						$('#numberUser').html(showNumber);
 					}
 				});
 			}else{
 				return false;
 			}
-
-	
 	});
 
 
@@ -114,29 +99,10 @@ $(document).ready(function(){
  			},
  			success:function(data){
  				console.log(data);
- 				// var dulieu = data;
- 				// var info ="";
- 				// for (var i = 0; i < dulieu.length; i++) {
- 				// 	console.log(dulieu[i]['name']);
- 				// 	info+="<td>"+$dulieu[i]['name']+"</td>";
-	 			// 	info+="<td>"+$dulieu[i]['email']+"</td>";
-	 			// 	info+="<td>"+$dulieu[i]['tel']+"</td>";
-	 			// 	info+="<td>"+$dulieu[i]['address']+"</td>";
-	 			// 	info+="<td>"+$dulieu[i]['dayofbirth']+"</td>";
-	 			// 	info+='<td><a class="btn btn-danger col-sm-10 rounded-pill" id="delete"data-url="{{route('user.destroy',$value->id)}}" data="{{$value->id}}"><i class="fas fa-times"></a></td>';
- 				// }
- 				// console.log(info);
- 				// $('#tableUser').append(info);
-
  			}
 
  		});
  	});
-
-
- 
-
-
 });
 
 

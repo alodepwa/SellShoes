@@ -8,9 +8,17 @@ $(document).ready(function(){
 		}
 	});
 
-	$('.notification').hide();
 
-	$('#save').click(function(e){
+	$(document).on('click','#add',function(){
+		$('.notificationF').hide();
+		$('.notification').hide();
+	});
+	
+
+	// start add category
+	$(document).on('click','#save',function(e){
+		$('.mess').html('');
+		$('.messF').html('');
 		e.preventDefault();
 		$('.notification').show();
 		$.ajax({
@@ -24,24 +32,32 @@ $(document).ready(function(){
 				console.log(data);
 				if(data != undefined && data.errors != undefined){
 					$.each(data.errors,function(key,value){
-						$('.notification').show();
-						$('.mess').append(value);
+						$('.notificationF').show();
+						$('.messF').html(value);
+						$('.notification').hide();
 					});
 				}else{
-					alert(data['dataSuccess']);
+					if(data.dataFail!=null){
+						$('.notificationF').show();
+						$('.messF').append(data['dataFail']);
+						$('.notification').hide();
+					}else{
+						$('.notification').show();
+						$('.mess').append(data['dataSuccess']);
+						$('.notificationF').hide();
+					}
+					
+					// alert(data['dataSuccess']);
 				}
 			},
 			error:function(error){
 				$('.mess').html("ERROR!!!");
 			}
-
-
 		})
 		.done(function(){
 			$("#table_Cate").load(' #table_Cate');
 			$("#pageAdd").load(" #pageAdd");
 		});
-
 	});  
 	// end add
 
@@ -67,20 +83,17 @@ $(document).ready(function(){
 				}
 			});
 		}
-
-
-
 	});
 
 		// start edit category
 		$(document).on("click",'.edit_Cate', function(){
+			$('.notification').hide();
+			$('.mess').html('');
 			var id = $(this).attr("data-id");
-			console.log(id);
 			var name = $(this).attr("data-name");
-
 			$('input[name="name"]').val(name);
-
-			$('#save_Edit_Cate').on("click", function(){
+			$(document).on("click",'#save_Edit_Cate', function(){
+				$('.mess').html('');
 				$.ajax({
 					url:'/admin/category/'+id,
 					type:'PUT',
@@ -95,16 +108,16 @@ $(document).ready(function(){
 								$('.mess').append(value);
 							});
 						}else{
-							alert(data['dataSuccess']);
+							$('.notification').show();
+							$('.mess').append(data['dataSuccess']);
+							// alert(data['dataSuccess']);
 						}
 						$("#table_Cate").load(' #table_Cate');
 					}
 				});
-
 		});
 
 	});
-
 
 });
 

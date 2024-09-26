@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class AddColumnUsersTable extends Migration
+class AddIsStatusColumnToOrderProducts extends Migration
 {
     /**
      * Run the migrations.
@@ -13,11 +13,8 @@ class AddColumnUsersTable extends Migration
      */
     public function up()
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->integer('tel');
-            $table->string('address');
-            $table->char('gender');
-            $table->date('dayofbirth')->nullable();
+        Schema::table('order__products', function (Blueprint $table) {
+            $table->integer('status')->nullable();
         });
     }
 
@@ -28,8 +25,8 @@ class AddColumnUsersTable extends Migration
      */
     public function down()
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn('users');
+        Schema::table('order__products', function (Blueprint $table) {
+            $table->dropIfExists('status');
         });
     }
 }

@@ -17,7 +17,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'name', 'email', 'password','tel','address','gender','dayofbirth','role_id'
+        'name', 'email', 'password','role_id','tel','address'
     ];
 
     protected $users=['deleted_at'];
@@ -40,7 +40,7 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
-    public function role(){
-        // return $this->belongsTo()
+    public function productComments(){
+        return $this->belongsToMany('App\Product','comments','user_id','product_id')->withPivot('rate','content','status')->withTimestamps();
     }
 }

@@ -1,0 +1,28 @@
+*{
+	margin:0;
+	padding: 0;
+}
+.details .imgBottom img{
+	width: 100px;
+	height: 85px;
+}
+.details form input[type="number"]{
+	width: 50px;
+	height: 40px;
+}
+.details small{
+	font-size: 25px;
+	color: red;
+
+}
+.details .imgTop img{
+	width: 500px;
+	height: 500px;
+}
+.bottom img{
+	width: 300px;
+	height: 85px;
+}
+.featured img{
+	width: 120px;
+}

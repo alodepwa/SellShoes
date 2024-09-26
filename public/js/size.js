@@ -12,9 +12,6 @@ $(document).ready(function(){
 	$('.notificationE').hide();
 
 	$('#save').click(function(e){
-		// e.preventDefault();
-		// console.log('alo');
-		
 		$.ajax({
 			url:'/admin/size',
 			type:"POST",
@@ -33,14 +30,10 @@ $(document).ready(function(){
 				}
 				if(data != undefined && data.datasuccess != undefined){
 					$.each(data['datasuccess'], function(key, value){
-						$('.notificationS').show();
+						$('.notificationS').hide();
 						$('.notificationE').hide();
-						$('.messS').append(value);
 					});
 				}
-				
-			
-
 				$("#table_Cate").load(' #table_Cate');
 				$("#pageAdd").load(" #pageAdd");
 			},
@@ -49,7 +42,6 @@ $(document).ready(function(){
 				$('.mess').html("ERROR!!!");
 			}
 		});
-
 	});  
 	// end add
 
@@ -78,8 +70,6 @@ $(document).ready(function(){
 				}
 			});
 		}
-
-
 	});
 
 	// end delete
@@ -92,10 +82,7 @@ $(document).ready(function(){
 			var name = $(this).attr("data-name");
 			$('.notification').hide();
 			$('input[name="name"]').val(name);
-
 			$('#save_Edit_Cate').on("click", function(){
-			// var form_data = $(this).serialize();
-			// console.log(form_data);
 				$.ajax({
 					url:'/admin/size/'+id,
 					type:'PUT',
@@ -107,7 +94,6 @@ $(document).ready(function(){
 						console.log(data);
 						if(data != undefined && data.errors !=undefined){
 							$.each(data['errors'],function(key, value){
-								console.log(value)
 								$('.notificationE').show();
 								$('.notificationS').hide();
 								$('.messE').append(value);
@@ -121,21 +107,13 @@ $(document).ready(function(){
 							});
 							$("#table_Cate").load(' #table_Cate');
 						}
-						
 					}
 				});
-
 		});
 
 		$("#close_Edit").on("click", function(){
 			id=null;
 		});
-
-
 	});
-
-
-	
-
 });
 

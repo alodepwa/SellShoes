@@ -73,7 +73,6 @@
 	</div>
 </div>
 
-  
 <div class="modal fade" id="myModal">
 	<div class="modal-dialog" role="document">
 		<div class="modal-content">
@@ -87,11 +86,14 @@
 								<div class="alert alert-success mess"></div>
 							</div>
 						</div>
+						<div class="row notificationF">
+							<div class="container-fluid">
+								<div class="alert alert-danger messF"></div>
+							</div>
+						</div>
 				</div>
-				
 			</div>
 			<div class="modal-body">
-
 				<form method="post" action="{{route('category.store')}}">
 					@csrf
 					<fieldset class="form-group">
@@ -147,6 +149,5 @@
 	</div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
 </div>
-
 
 @endsection

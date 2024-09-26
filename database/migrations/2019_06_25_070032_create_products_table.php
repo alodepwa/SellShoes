@@ -20,7 +20,6 @@ class CreateProductsTable extends Migration
             $table->float('price');
             $table->integer('category_id');
             $table->integer('brand_id');
-            $table->integer('size_id');
             $table->text('description');
             $table->timestamps();
             $table->softDeletes();

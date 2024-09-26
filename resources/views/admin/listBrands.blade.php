@@ -82,7 +82,7 @@
 					</div>
 						<div class="row notification">
 							<div class="container-fluid">
-								<div class="alert alert-success mess"></div>
+								<div class="alert alert-danger mess"></div>
 							</div>
 						</div>
 				</div>
